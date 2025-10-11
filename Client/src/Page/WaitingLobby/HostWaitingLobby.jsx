@@ -6,7 +6,7 @@ const HostWaitingLobby = () => {
   const [roomCode] = useState("2v46z");
   const [copied, setCopied] = useState(false);
   const [questions, setQuestions] = useState([]);
-  const [participants] = useState(["Sandesh (Host)", "Aryan", "Aniket", "John", "Shantanu"]);
+  const [participants] = useState(["Sandesh (Host)", "Aryan", "Aniket", "Piyush", "Shantanu"]);
 
   const [form, setForm] = useState({
     title: "",

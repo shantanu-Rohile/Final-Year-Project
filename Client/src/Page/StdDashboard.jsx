@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Home, Calendar, Users, Target, Plus, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "../Components/Sidebar";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -33,11 +34,11 @@ export default function Dashboard() {
 
   const handleJoinRoom = () => {
     if (roomCode.trim() === "123") {
-      navigate("/studwait")
+      navigate("/studwait");
       return;
-    }else{
-       alert("Please enter a room code");
-       return;
+    } else {
+      alert("Please enter a room code");
+      return;
     }
     navigate(`/room/${roomCode}`);
   };
@@ -45,14 +46,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100 text-gray-800">
       {/* Sidebar */}
-      <aside className="w-16 bg-white shadow-md flex flex-col items-center py-5 space-y-6 border-r border-gray-200">
-        {[Home, Calendar, Users, Target].map((Icon, idx) => (
-          <Icon
-            key={idx}
-            className="w-6 h-6 text-gray-500 hover:text-indigo-600 transition-colors duration-200 cursor-pointer"
-          />
-        ))}
-      </aside>
+      <Sidebar />
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
@@ -97,7 +91,8 @@ export default function Dashboard() {
               onClick={() => navigate("/HostWait")}
               className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
             >
-              + Create Room
+              <icon className="fas fa-plus mr-2"></icon>
+              Create Room
             </button>
           </div>
         </div>
@@ -170,7 +165,7 @@ export default function Dashboard() {
                     onClick={() => deleteGoal(goal.id)}
                     className="text-gray-400 hover:text-red-500 transition"
                   >
-                    🗑️
+                    <i className="fas fa-trash-alt"></i>
                   </button>
                 </li>
               ))}
@@ -211,7 +206,10 @@ export default function Dashboard() {
 
         {/* Recent Rooms */}
         <section className="bg-white shadow-sm rounded-xl p-5 hover:shadow-md transition">
-          <h2 className="font-semibold mb-4 text-gray-700">Recent Rooms</h2>
+          <h2 className="font-semibold mb-4 text-gray-700">
+            <icon className="fas fa-door-open text-indigo-600 w-5 h-5 mb-2"></icon>{" "}
+            Recent Rooms
+          </h2>
           <div className="space-y-3">
             {[
               {

@@ -1,10 +1,7 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-import LandingPage from './Components/LandingPage/student_dashboard'
-import HostWait from './Components/WaitingLobby/HostWaitingLobby'
-import StudentWait from './Components/WaitingLobby/WaitingLobby'
+import LandingPage from './Page/StdDashboard'
+import HostWait from './Page/WaitingLobby/HostWaitingLobby'
+import StudentWait from './Page/WaitingLobby/WaitingLobby'
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
