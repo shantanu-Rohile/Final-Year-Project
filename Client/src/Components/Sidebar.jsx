@@ -1,56 +1,144 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect, forwardRef } from "react";
+import { motion } from "framer-motion";
+import {
+  Home,
+  Radio,
+  BarChart2,
+  StickyNote,
+  UserCheck,
+  BadgeInfo,
+  Settings,
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const Sidebar = () => {
+function Sidebar() {
   const [active, setActive] = useState("home");
+  const sidebarRef = useRef(null);
+  const linkRefs = useRef({});
+  const [indicatorPos, setIndicatorPos] = useState({ top: 0 });
+  const navigate = useNavigate();
 
-  const menuItems = [
-    { id: "home", icon: "fa-home", label: "Home" },
-    { id: "session", icon: "fa-video", label: "Session" },
-    { id: "stats", icon: "fa-chart-bar", label: "Stats" },
-    { id: "notes", icon: "fa-sticky-note", label: "Notes" },
-    { id: "attendance", icon: "fa-user-check", label: "Attendance" },
-    { id: "about", icon: "fa-info-circle", label: "About" },
-    { id: "settings", icon: "fa-cog", label: "Settings" },
-  ];
+  // Update the purple indicator position when active item changes
+  useEffect(() => {
+    const activeLink = linkRefs.current[active];
+    if (sidebarRef.current && activeLink) {
+      const containerRect = sidebarRef.current.getBoundingClientRect();
+      const linkRect = activeLink.getBoundingClientRect();
+      const indicatorHeight = 32;
+      const top =
+        linkRect.top -
+        containerRect.top +
+        linkRect.height / 2 -
+        indicatorHeight / 2;
+      setIndicatorPos({ top });
+    }
+  }, [active]);
+
+  // Single Sidebar Item
+  const SidebarLink = forwardRef(({ IconComponent, label, id, isActive }, ref) => {
+    return (
+      <div
+        // to={to}
+        ref={ref}
+        onClick={() => setActive(id)}
+        className={`relative flex flex-col items-center justify-center pt-2.5 pb-2 group cursor-pointer hover:bg-ter rounded-lg transition-colors`}
+      >
+        <IconComponent
+          className={`size-5 2xl:size-6 transition-colors duration-300 ${
+            isActive ? "text-white" : "text-gray-400 group-hover:text-white"
+          }`}
+        />
+        <span className="text-xs text-gray-400 group-hover:text-white">
+          {label}
+        </span>
+      </div>
+    );
+  });
+  SidebarLink.displayName = "SidebarLink";
 
   return (
-    <div className="h-screen w-20 bg-[#0E1420] items-center py-6 space-y-6">
-      {/* Logo */}
-      <div className="">
-        <img
-          src="/logo.png"
-          alt="logo"
-          className="w-10 h-10 rounded-lg cursor-pointer"
+    <nav
+      ref={sidebarRef}
+      className="w-[70px] border-r border-gray-500/20 p-1 flex flex-col items-center justify-between fixed top-0 left-0 h-screen bg-[#0E1420]"
+    >
+      {/* Top Section */}
+      <div>
+        {/* Logo */}
+        <div className="hover:bg-ter rounded-lg transition-opacity duration-300">
+          <img
+            src="./logo.png"
+            alt="Logo"
+            className={`w-full m-auto object-contain p-4 logo-filter opacity-90`}
+          />
+        </div>
+
+        {/* Menu Items */}
+        <div className="space-y-2.5 2xl:space-y-4 mt-1 2xl:mt-2">
+          <SidebarLink
+            id="home"
+            IconComponent={Home}
+            label="Home"
+            isActive={active === "home"}
+            ref={(el) => (linkRefs.current["home"] = el)}
+          />
+          <SidebarLink
+            id="session"
+            IconComponent={Radio}
+            label="Session"
+            isActive={active === "session"}
+            ref={(el) => (linkRefs.current["session"] = el)}
+          />
+          <SidebarLink
+            id="stats"
+            IconComponent={BarChart2}
+            label="Stats"
+            isActive={active === "stats"}
+            ref={(el) => (linkRefs.current["stats"] = el)}
+          />
+          <SidebarLink
+            id="notes"
+            IconComponent={StickyNote}
+            label="Notes"
+            isActive={active === "notes"}
+            ref={(el) => (linkRefs.current["notes"] = el)}
+          />
+          <SidebarLink
+            id="attendance"
+            IconComponent={UserCheck}
+            label="Attendance"
+            isActive={active === "attendance"}
+            ref={(el) => (linkRefs.current["attendance"] = el)}
+          />
+          <hr className="border-[var(--txt-disabled)] opacity-50 md:my-2.5 2xl:my-4 mx-4" />
+          <SidebarLink
+            id="about"
+            IconComponent={BadgeInfo}
+            label="About"
+            isActive={active === "about"}
+            ref={(el) => (linkRefs.current["about"] = el)}
+          />
+        </div>
+      </div>
+
+      {/* Bottom Section */}
+      <div className="space-y-2 w-full mb-4">
+        <SidebarLink
+          id="settings"
+          IconComponent={Settings}
+          label="Settings"
+          isActive={active === "settings"}
+          ref={(el) => (linkRefs.current["settings"] = el)}
         />
       </div>
 
-      {/* Menu Items */}
-      <div className="flex flex-col space-y-6">
-        {menuItems.map((item) => (
-          <div
-            key={item.id}
-            className={`relative flex flex-col items-center group cursor-pointer transition-all duration-300 ${
-              active === item.id ? "text-white" : "text-gray-400"
-            }`}
-            // onClick={() => setActive(item.id)}
-          >
-            {/* Active indicator bar */}
-            {/* {active === item.id && (
-              <span className="absolute -left-3 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-purple-500 rounded-full"></span>
-            )} */}
-
-            {/* Icon */}
-            <i
-              className={`fas ${item.icon} text-xl mb-1 group-hover:text-white transition-colors duration-300`}
-            ></i>
-
-            {/* Label */}
-            <span className="text-xs font-medium">{item.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
+      {/* Purple Active Indicator */}
+      <motion.span
+        className="absolute left-1 h-8 w-1 rounded-full bg-purple-500"
+        animate={{ top: indicatorPos.top }}
+        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      />
+    </nav>
   );
-};
+}
 
 export default Sidebar;

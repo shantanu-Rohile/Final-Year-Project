@@ -44,31 +44,31 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 text-gray-800">
+    <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto">
+      <main className="flex-1 p-8 overflow-y-auto ml-[70px]">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-4">
           <div>
             <h1 className="text-2xl font-semibold">Welcome back, Student 👋</h1>
-            <p className="text-gray-500 mt-1">
+            <p className="text-[var(--txt-dim)] mt-1">
               Ready to learn something new today?
             </p>
           </div>
 
           {/* Search & Join/Create Section */}
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <div className="flex items-center bg-white border border-gray-200 rounded-lg px-3 py-2 w-full sm:w-72 shadow-sm">
-              <Search className="w-4 h-4 text-gray-400 mr-2" />
+            <div className="flex items-center bg-[var(--bg-sec)] border border-[var(--bg-ter)] rounded-[var(--radius)] px-3 py-2 w-full sm:w-72 shadow-sm">
+              <Search className="w-4 h-4 text-[var(--txt-dim)] mr-2" />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search for rooms, topics, or teachers..."
-                className="flex-1 text-sm text-gray-700 focus:outline-none"
+                className="flex-1 text-sm bg-[var(--bg-sec)] text-[var(--txt)] placeholder-[var(--txt-dim)] focus:outline-none"
               />
             </div>
 
@@ -77,19 +77,19 @@ export default function Dashboard() {
               value={roomCode}
               onChange={(e) => setRoomCode(e.target.value)}
               placeholder="Enter room code"
-              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none w-full sm:w-40"
+              className="border border-[var(--bg-ter)] rounded-[var(--radius)] px-3 py-2 text-sm bg-[var(--bg-sec)] text-[var(--txt)] placeholder-[var(--txt-dim)] focus:ring-2 focus:ring-[var(--btn)] focus:outline-none w-full sm:w-40"
             />
 
             <button
               onClick={handleJoinRoom}
-              className="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 transition"
+              className="bg-[var(--btn)] text-white px-4 py-2 rounded-[var(--radius)] hover:bg-[var(--btn-hover)] transition"
             >
               Join Room
             </button>
 
             <button
               onClick={() => navigate("/HostWait")}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+              className="bg-[var(--btn)] text-white px-4 py-2 rounded-[var(--radius)] hover:bg-[var(--btn-hover)] transition flex items-center"
             >
               <icon className="fas fa-plus mr-2"></icon>
               Create Room
@@ -107,10 +107,12 @@ export default function Dashboard() {
           ].map((stat, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition"
+              className="bg-[var(--bg-sec)] rounded-[var(--radius)] shadow-sm p-4 hover:shadow-md transition"
             >
-              <p className="text-sm text-gray-500">{stat.label}</p>
-              <p className="text-xl font-semibold mt-1">{stat.value}</p>
+              <p className="text-sm text-[var(--txt-dim)]">{stat.label}</p>
+              <p className="text-xl font-semibold mt-1 text-[var(--txt)]">
+                {stat.value}
+              </p>
             </div>
           ))}
         </section>
@@ -118,21 +120,21 @@ export default function Dashboard() {
         {/* Goals & Events */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Goals Section */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition">
-            <h2 className="font-semibold mb-4 flex items-center gap-2 text-gray-700">
-              <Target className="w-5 h-5 text-indigo-600" /> Set Goals
+          <div className="lg:col-span-2 bg-[var(--bg-sec)] rounded-[var(--radius)] shadow-sm p-5 hover:shadow-md transition">
+            <h2 className="font-semibold mb-4 flex items-center gap-2 text-[var(--txt)]">
+              <Target className="w-5 h-5 text-[var(--btn)]" /> Set Goals
             </h2>
 
             <div className="flex mb-4 gap-2">
               <input
                 value={newGoal}
                 onChange={(e) => setNewGoal(e.target.value)}
-                className="border border-gray-300 w-full p-2 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="border border-[var(--bg-ter)] w-full p-2 rounded-[var(--radius)] text-sm bg-[var(--bg-primary)] text-[var(--txt)] focus:ring-2 focus:ring-[var(--btn)] focus:outline-none"
                 placeholder="Add a new goal..."
               />
               <button
                 onClick={addGoal}
-                className="bg-indigo-600 text-white px-3 rounded-lg hover:bg-indigo-700 transition"
+                className="bg-[var(--btn)] text-white px-3 rounded-[var(--radius)] hover:bg-[var(--btn-hover)] transition"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -142,20 +144,20 @@ export default function Dashboard() {
               {goals.map((goal) => (
                 <li
                   key={goal.id}
-                  className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg p-2 hover:bg-gray-100 transition"
+                  className="flex items-center justify-between bg-[var(--bg-ter)] border border-[var(--bg-sec)] rounded-[var(--radius)] p-2 hover:bg-[var(--bg-sec)] transition"
                 >
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={goal.completed}
                       onChange={() => toggleGoal(goal.id)}
-                      className="w-4 h-4 accent-indigo-600"
+                      className="w-4 h-4 accent-[var(--btn)]"
                     />
                     <span
                       className={
                         goal.completed
-                          ? "line-through text-gray-400"
-                          : "text-gray-700"
+                          ? "line-through text-[var(--txt-dim)]"
+                          : "text-[var(--txt)]"
                       }
                     >
                       {goal.text}
@@ -163,7 +165,7 @@ export default function Dashboard() {
                   </div>
                   <button
                     onClick={() => deleteGoal(goal.id)}
-                    className="text-gray-400 hover:text-red-500 transition"
+                    className="text-red-500 hover:text-red-700 transition"
                   >
                     <i className="fas fa-trash-alt"></i>
                   </button>
@@ -173,9 +175,9 @@ export default function Dashboard() {
           </div>
 
           {/* Events Section */}
-          <div className="bg-white rounded-xl shadow-sm p-5 hover:shadow-md transition">
-            <h2 className="font-semibold mb-4 flex items-center gap-2 text-gray-700">
-              <Calendar className="w-5 h-5 text-indigo-600" /> Recent Events
+          <div className="bg-[var(--bg-sec)] rounded-[var(--radius)] shadow-sm p-5 hover:shadow-md transition">
+            <h2 className="font-semibold mb-4 flex items-center gap-2 text-[var(--txt)]">
+              <Calendar className="w-5 h-5 text-[var(--btn)]" /> Recent Events
             </h2>
             <div className="space-y-3">
               {[
@@ -194,10 +196,10 @@ export default function Dashboard() {
               ].map((event, idx) => (
                 <div
                   key={idx}
-                  className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition"
+                  className="border border-[var(--bg-ter)] rounded-[var(--radius)] p-3 hover:bg-[var(--bg-primary)] transition"
                 >
-                  <p className="font-medium text-gray-700">{event.title}</p>
-                  <p className="text-xs text-gray-500">{event.time}</p>
+                  <p className="font-medium text-[var(--txt)]">{event.title}</p>
+                  <p className="text-xs text-[var(--txt-dim)]">{event.time}</p>
                 </div>
               ))}
             </div>
@@ -205,9 +207,9 @@ export default function Dashboard() {
         </section>
 
         {/* Recent Rooms */}
-        <section className="bg-white shadow-sm rounded-xl p-5 hover:shadow-md transition">
-          <h2 className="font-semibold mb-4 text-gray-700">
-            <icon className="fas fa-door-open text-indigo-600 w-5 h-5 mb-2"></icon>{" "}
+        <section className="bg-[var(--bg-sec)] shadow-sm rounded-[var(--radius)] p-5 hover:shadow-md transition">
+          <h2 className="font-semibold mb-4 text-[var(--txt)]">
+            <icon className="fas fa-door-open text-[var(--btn)] w-5 h-5 mb-2"></icon>{" "}
             Recent Rooms
           </h2>
           <div className="space-y-3">
@@ -227,19 +229,19 @@ export default function Dashboard() {
             ].map((room, idx) => (
               <div
                 key={idx}
-                className="border border-gray-200 rounded-lg p-3 flex justify-between hover:bg-gray-50 transition"
+                className="border border-[var(--bg-ter)] rounded-[var(--radius)] p-3 flex justify-between hover:bg-[var(--bg-primary)] transition"
               >
                 <div>
-                  <p className="font-medium text-gray-700">{room.title}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="font-medium text-[var(--txt)]">{room.title}</p>
+                  <p className="text-xs text-[var(--txt-dim)]">
                     Hosted by {room.host} · {room.participants} participants
                   </p>
                 </div>
                 <span
                   className={`text-sm font-medium ${
                     room.status === "active"
-                      ? "text-green-600"
-                      : "text-blue-600"
+                      ? "text-green-500"
+                      : "text-blue-500"
                   }`}
                 >
                   {room.status}
