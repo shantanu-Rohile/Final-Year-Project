@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef } from "react";
 import { motion } from "framer-motion";
+import Logo from "../assets/logo.jpg"
 import {
   Home,
   Radio,
@@ -66,10 +67,11 @@ function Sidebar() {
         {/* Logo */}
         <div className="hover:bg-ter rounded-lg transition-opacity duration-300">
           <img
-            src="./logo.png"
+            src={Logo}
             alt="Logo"
-            className={`w-full m-auto object-contain p-4 logo-filter opacity-90`}
+            className={"w-32 mx-auto p-1 my-4 object-contain logo-filter opacity-100"}
           />
+          
         </div>
 
         {/* Menu Items */}
