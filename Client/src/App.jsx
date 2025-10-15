@@ -6,7 +6,7 @@ import RoomPage from "./Page/RoomsPage";
 // import Test from './Components/Test'
 import FinalLeaderboard from "./Page/Session/FinalLeaderboard";
 
-import Test from "./Components/Test";
+
 import QuizTest from "./Page/Session/Quiz";
 
 function App() {
@@ -15,7 +15,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/test" element={<Test />} />
+        
           <Route path="/hostwait" element={<HostWait />} />
           <Route path="/studwait" element={<StudentWait />} />
           <Route path="/session" element={<RoomPage />} />
