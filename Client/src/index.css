@@ -17,20 +17,31 @@
   --shadow-rgb: 107, 33, 168; /* Dark theme shadow RGB */
 }
 
-/* Optional utility extensions */
-:root {
-  color-scheme: light;
-}
-
-body {
-  background-color: var(--color-bg);
-  color: var(--color-text);
-  font-family: "Segoe UI", Roboto, sans-serif;
-}
-a {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-a:hover {
-  color: var(--color-accent);
-}
+/*@layer base  {
+  .dark{
+    --bg-primary: #111827;
+    --bg-sec: #1f2937;
+    --bg-ter: #374151;
+    --txt: #d1d5db;
+    --txt-dim: #9ca3af;
+    --txt-disabled: #9097a2;
+    --radius: 0.5rem;
+    --btn: #6b21a8;
+    --btn-hover: #7a24c1;
+    --logo-invert: 1;
+    --shadow-rgb: 107, 33, 168; 
+  }
+    
+  .light {
+    --bg-primary: #faf5ff;
+    --bg-sec: #f3e8ff;
+    --bg-ter: #ffffff;
+    --txt: #581c87;
+    --txt-dim: #7c3aed;
+    --txt-disabled: #6b7280;
+    --btn: #8b5cf6;
+    --btn-hover: #7c3aed;
+    --logo-invert: 0;
+    --shadow-rgb: 139, 92, 246;
+  }
+} */
