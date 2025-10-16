@@ -14,7 +14,7 @@
   --btn: #6b21a8;
   --btn-hover: #7a24c1;
   --logo-invert: 1;
-  --shadow-rgb: 107, 33, 168; /* Dark theme shadow RGB */
+  --shadow-rgb: 107, 33, 168;
 }
 
 /*@layer base  {

@@ -1,42 +1,62 @@
-import React, { useState, useEffect } from 'react';
-import RoomList from '../Components/Session/RoomList';
-import FilterBar from '../Components/Session/FilterBar';
-import CreateRoomCard from '../Components/Session/CreateRoomCard';
+import React, { useState, useEffect } from "react";
+import RoomList from "../Components/Session/RoomList";
+import FilterBar from "../Components/Session/FilterBar";
+import CreateRoomCard from "../Components/Session/CreateRoomCard";
+import Sidebar from "../Components/Sidebar";
 
 const initialYourRooms = [
-  { name: 'Temp Room', category: 'Career-Development', description: 'Temp', action: 'Enter Room' }
+  {
+    name: "Temp Room",
+    category: "Career-Development",
+    description: "Temp",
+    action: "Enter Room",
+  },
 ];
 
 const allRoomsData = [
-  { name: 'hbhcjsd', category: 'Hobbies', description: 'sdkfhcbsd', action: 'Request Join' },
-  { name: 'asdfasdf', category: 'Tech', description: 'asdfasdf', action: 'Enter Room' },
-  { name: 'adf', category: 'Tech', description: 'asdf', action: 'Enter Room' },
+  {
+    name: "hbhcjsd",
+    category: "Hobbies",
+    description: "sdkfhcbsd",
+    action: "Request Join",
+  },
+  {
+    name: "asdfasdf",
+    category: "Tech",
+    description: "asdfasdf",
+    action: "Enter Room",
+  },
+  { name: "adf", category: "Tech", description: "asdf", action: "Enter Room" },
 ];
 
 const categories = [
-  'Tech',
-  'Science',
-  'Language-learning',
-  'Professional',
-  'Career-Development',
-  'General',
-  'Study-Room',
-  'Hobbies'
+  "Tech",
+  "Science",
+  "Language-learning",
+  "Professional",
+  "Career-Development",
+  "General",
+  "Study-Room",
+  "Hobbies",
 ];
 
-const filters = ['All', ...categories];
+const filters = ["All", ...categories];
 
 const RoomsPage = () => {
   const [yourRooms, setYourRooms] = useState(initialYourRooms);
   const [allRooms] = useState(allRoomsData);
-  const [selectedFilter, setSelectedFilter] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ name: '', category: '', description: '' });
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    description: "",
+  });
 
   // Load from localStorage
   useEffect(() => {
-    const savedRooms = localStorage.getItem('yourRooms');
+    const savedRooms = localStorage.getItem("yourRooms");
     if (savedRooms) {
       setYourRooms(JSON.parse(savedRooms));
     }
@@ -44,12 +64,15 @@ const RoomsPage = () => {
 
   // Save to localStorage
   useEffect(() => {
-    localStorage.setItem('yourRooms', JSON.stringify(yourRooms));
+    localStorage.setItem("yourRooms", JSON.stringify(yourRooms));
   }, [yourRooms]);
 
-  const filteredRooms = allRooms.filter(room => {
-    const matchesCategory = selectedFilter === 'All' || room.category === selectedFilter;
-    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredRooms = allRooms.filter((room) => {
+    const matchesCategory =
+      selectedFilter === "All" || room.category === selectedFilter;
+    const matchesSearch = room.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -61,11 +84,11 @@ const RoomsPage = () => {
       name: formData.name,
       category: formData.category,
       description: formData.description,
-      action: 'Enter Room'
+      action: "Enter Room",
     };
 
     setYourRooms([...yourRooms, newRoom]);
-    setFormData({ name: '', category: '', description: '' });
+    setFormData({ name: "", category: "", description: "" });
     setShowModal(false);
   };
 
@@ -76,13 +99,17 @@ const RoomsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-900 text-gray-200">
-      <div className="flex-1 p-6 overflow-y-auto">
+      <Sidebar/>
+      <div className="flex-1 p-6 overflow-y-auto ml-[70px]">
         {/* Your Rooms */}
         <section className="mb-10">
           <h2 className="text-xl font-semibold mb-4">Your Rooms</h2>
           <div className="flex flex-wrap gap-4">
             {yourRooms.map((room, i) => (
-              <div key={i} className="bg-gray-800 rounded-lg shadow-md p-4 w-64">
+              <div
+                key={i}
+                className="bg-gray-800 rounded-lg shadow-md p-4 w-64"
+              >
                 <h3 className="text-lg font-bold">{room.name}</h3>
                 <p className="text-sm text-gray-400">{room.category}</p>
                 <p className="text-sm text-gray-500">{room.description}</p>
@@ -130,25 +157,31 @@ const RoomsPage = () => {
                 type="text"
                 placeholder="Room Name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 rounded bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
               <select
-  value={formData.category}
-  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-  className="w-full px-3 py-2 rounded bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600"
->
-  <option value="">Select Category</option>
-  {categories.map((cat, i) => (
-    <option key={i} value={cat}>
-      {cat}
-    </option>
-  ))}
-</select>
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                className="w-full px-3 py-2 rounded bg-gray-700 text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-600"
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat, i) => (
+                  <option key={i} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
               <textarea
                 placeholder="Description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 className="w-full px-3 py-2 rounded bg-gray-700 text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-600"
               />
               <div className="flex justify-end gap-3">
