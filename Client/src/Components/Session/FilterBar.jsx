@@ -9,8 +9,8 @@ const FilterBar = ({ filters, onFilter, activeFilter }) => (
         className={`px-4 py-1 rounded-full text-sm font-medium transition 
           ${
             activeFilter === filter
-              ? 'bg-purple-700 text-white'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              ? 'bg-[var(--btn)] text-white'
+              : 'bg-[var(--bg-sec)] text-[var(--txt-dim)] hover:bg-[var(--bg-ter)]'
           }`}
       >
         {filter}
