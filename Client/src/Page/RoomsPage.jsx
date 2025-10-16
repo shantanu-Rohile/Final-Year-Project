@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import RoomList from '../Components/Session/RoomList';
 import FilterBar from '../Components/Session/FilterBar';
-import CreateRoomCard from '../Components/Session/CreateRoomCard';
+
 
 const initialYourRooms = [
   { name: 'Temp Room', category: 'Career-Development', description: 'Temp', action: 'Enter Room' }
@@ -33,6 +33,7 @@ const RoomsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({ name: '', category: '', description: '' });
+  
 
   // Load from localStorage
   useEffect(() => {
@@ -74,36 +75,65 @@ const RoomsPage = () => {
     setYourRooms(updatedRooms);
   };
 
-  return (
-    <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
-      <div className="flex-1 p-6 overflow-y-auto">
-        {/* Your Rooms */}
-        <section className="mb-10">
-          <h2 className="text-xl font-semibold mb-4">Your Rooms</h2>
-          <div className="flex flex-wrap gap-4">
-            {yourRooms.map((room, i) => (
-              <div key={i} className="bg-[var(--bg-sec)] rounded-[var(--radius)] shadow-sm p-4 w-64 hover:shadow-md transition">
-                <h3 className="text-lg font-bold text-[var(--txt)]">{room.name}</h3>
-                <p className="text-sm text-[var(--txt-dim)]">{room.category}</p>
-                <p className="text-sm text-[var(--txt-disabled)]">{room.description}</p>
-                <div className="flex justify-between mt-3">
-                  <button className="bg-[var(--btn)] hover:bg-[var(--btn-hover)] text-white px-3 py-1 rounded-[var(--radius)] transition">
-                    {room.action}
-                  </button>
-                  <button
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-[var(--radius)] transition"
-                    onClick={() => handleDeleteRoom(i)}
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
-            ))}
-            <div onClick={() => setShowModal(true)} className="cursor-pointer">
-              <CreateRoomCard />
-            </div>
+  // state at the top of your component
+const [selectedRoomIndex, setSelectedRoomIndex] = useState(null);
+
+return (
+  <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
+    <div className="flex-1 p-6 overflow-y-auto">
+      {/* Your Rooms */}
+      <section className="mb-10">
+        <h2 className="text-xl font-semibold mb-4">Your Rooms</h2>
+        <div className="flex flex-wrap gap-4">
+          {yourRooms.map((room, i) => (
+           <div
+  key={i}
+  onClick={() =>
+    setSelectedRoomIndex(selectedRoomIndex === i ? null : i)
+  }
+  className={`rounded-[var(--radius)] shadow-sm p-4 w-64 transition duration-300 ease-in-out transform
+    hover:-translate-y-1 hover:scale-105 hover:shadow-lg cursor-pointer
+    bg-[var(--bg-sec)] text-[var(--txt)]
+    ${selectedRoomIndex === i ? 'ring-2 ring-[var(--btn)] bg-[color-mix(in srgb,var(--btn)_10%,transparent)]' : ''}`}
+>
+  <h3 className="text-lg font-bold">{room.name}</h3>
+  <p className="text-sm text-[var(--txt-dim)]">{room.category}</p>
+  <p className="text-sm text-[var(--txt-disabled)]">{room.description}</p>
+  <div className="flex justify-between mt-3">
+    <button className="bg-[var(--btn)] hover:bg-[var(--btn-hover)] text-white px-3 py-1 rounded-[var(--radius)] transition">
+      {room.action}
+    </button>
+    <button
+      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-[var(--radius)] transition"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleDeleteRoom(i);
+      }}
+    >
+      Delete
+    </button>
+  </div>
+</div>
+          ))}
+        
+
+{/* Create Room Card */}
+           <div
+  onClick={() => {
+    setSelectedRoomIndex(-1);
+    setShowModal(true);
+  }}
+  className={`cursor-pointer rounded-[var(--radius)] shadow-sm p-6 w-64 flex flex-col items-center justify-center
+    transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg
+    bg-[var(--bg-sec)] text-[var(--txt-dim)] hover:bg-[var(--bg-ter)]
+    ${selectedRoomIndex === -1 ? 'ring-2 ring-[var(--btn)] bg-[color-mix(in srgb,var(--btn)_10%,transparent)]' : ''}`}
+>
+  <span className="text-4xl font-bold text-[var(--btn)]">+</span>
+  <h3 className="mt-2 text-lg font-semibold text-[var(--txt)]">Create Room</h3>
+</div>
           </div>
         </section>
+
 
         {/* Explore Rooms */}
         <section>
