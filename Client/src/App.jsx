@@ -8,6 +8,7 @@ import FinalLeaderboard from "./Page/Session/FinalLeaderboard";
 
 
 import QuizTest from "./Page/Session/Quiz";
+import AboutUs from "./Page/AboutUs";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/session" element={<RoomPage />} />
           <Route path="/quiz-test/:roomId" element={<QuizTest />} />
           <Route path="/final-leaderboard" element={<FinalLeaderboard />} />
+          <Route path="/Page" element={<AboutUs/>}/>
         </Routes>
       </Router>
     </>
