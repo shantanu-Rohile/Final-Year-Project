@@ -1,43 +1,61 @@
-import React, { useState, useEffect } from 'react';
-import RoomList from '../Components/Session/RoomList';
-import FilterBar from '../Components/Session/FilterBar';
-
+import React, { useState, useEffect } from "react";
+import RoomList from "../Components/Session/RoomList";
+import FilterBar from "../Components/Session/FilterBar";
+import Sidebar from "../Components/Sidebar";
 
 const initialYourRooms = [
-  { name: 'Temp Room', category: 'Career-Development', description: 'Temp', action: 'Enter Room' }
+  {
+    name: "Temp Room",
+    category: "Career-Development",
+    description: "Temp",
+    action: "Enter Room",
+  },
 ];
 
 const allRoomsData = [
-  { name: 'hbhcjsd', category: 'Hobbies', description: 'sdkfhcbsd', action: 'Request Join' },
-  { name: 'asdfasdf', category: 'Tech', description: 'asdfasdf', action: 'Enter Room' },
-  { name: 'adf', category: 'Tech', description: 'asdf', action: 'Enter Room' },
+  {
+    name: "hbhcjsd",
+    category: "Hobbies",
+    description: "sdkfhcbsd",
+    action: "Request Join",
+  },
+  {
+    name: "asdfasdf",
+    category: "Tech",
+    description: "asdfasdf",
+    action: "Enter Room",
+  },
+  { name: "adf", category: "Tech", description: "asdf", action: "Enter Room" },
 ];
 
 const categories = [
-  'Tech',
-  'Science',
-  'Language-learning',
-  'Professional',
-  'Career-Development',
-  'General',
-  'Study-Room',
-  'Hobbies'
+  "Tech",
+  "Science",
+  "Language-learning",
+  "Professional",
+  "Career-Development",
+  "General",
+  "Study-Room",
+  "Hobbies",
 ];
 
-const filters = ['All', ...categories];
+const filters = ["All", ...categories];
 
 const RoomsPage = () => {
   const [yourRooms, setYourRooms] = useState(initialYourRooms);
   const [allRooms] = useState(allRoomsData);
-  const [selectedFilter, setSelectedFilter] = useState('All');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [formData, setFormData] = useState({ name: '', category: '', description: '' });
-  
+  const [formData, setFormData] = useState({
+    name: "",
+    category: "",
+    description: "",
+  });
 
   // Load from localStorage
   useEffect(() => {
-    const savedRooms = localStorage.getItem('yourRooms');
+    const savedRooms = localStorage.getItem("yourRooms");
     if (savedRooms) {
       setYourRooms(JSON.parse(savedRooms));
     }
@@ -45,12 +63,15 @@ const RoomsPage = () => {
 
   // Save to localStorage
   useEffect(() => {
-    localStorage.setItem('yourRooms', JSON.stringify(yourRooms));
+    localStorage.setItem("yourRooms", JSON.stringify(yourRooms));
   }, [yourRooms]);
 
-  const filteredRooms = allRooms.filter(room => {
-    const matchesCategory = selectedFilter === 'All' || room.category === selectedFilter;
-    const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredRooms = allRooms.filter((room) => {
+    const matchesCategory =
+      selectedFilter === "All" || room.category === selectedFilter;
+    const matchesSearch = room.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -62,11 +83,11 @@ const RoomsPage = () => {
       name: formData.name,
       category: formData.category,
       description: formData.description,
-      action: 'Enter Room'
+      action: "Enter Room",
     };
 
     setYourRooms([...yourRooms, newRoom]);
-    setFormData({ name: '', category: '', description: '' });
+    setFormData({ name: "", category: "", description: "" });
     setShowModal(false);
   };
 
@@ -76,64 +97,75 @@ const RoomsPage = () => {
   };
 
   // state at the top of your component
-const [selectedRoomIndex, setSelectedRoomIndex] = useState(null);
+  const [selectedRoomIndex, setSelectedRoomIndex] = useState(null);
 
-return (
-  <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
-    <div className="flex-1 p-6 overflow-y-auto">
-      {/* Your Rooms */}
-      <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-4">Your Rooms</h2>
-        <div className="flex flex-wrap gap-4">
-          {yourRooms.map((room, i) => (
-           <div
-  key={i}
-  onClick={() =>
-    setSelectedRoomIndex(selectedRoomIndex === i ? null : i)
-  }
-  className={`rounded-[var(--radius)] shadow-sm p-4 w-64 transition duration-300 ease-in-out transform
+  return (
+    <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
+      <Sidebar />
+      <div className="flex-1 p-6 overflow-y-auto ml-[70px]">
+        {/* Your Rooms */}
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold mb-4">Your Rooms</h2>
+          <div className="flex flex-wrap gap-4">
+            {yourRooms.map((room, i) => (
+              <div
+                key={i}
+                onClick={() =>
+                  setSelectedRoomIndex(selectedRoomIndex === i ? null : i)
+                }
+                className={`rounded-[var(--radius)] shadow-sm p-4 w-64 transition duration-300 ease-in-out transform
     hover:-translate-y-1 hover:scale-105 hover:shadow-lg cursor-pointer
     bg-[var(--bg-sec)] text-[var(--txt)]
-    ${selectedRoomIndex === i ? 'ring-2 ring-[var(--btn)] bg-[color-mix(in srgb,var(--btn)_10%,transparent)]' : ''}`}
->
-  <h3 className="text-lg font-bold">{room.name}</h3>
-  <p className="text-sm text-[var(--txt-dim)]">{room.category}</p>
-  <p className="text-sm text-[var(--txt-disabled)]">{room.description}</p>
-  <div className="flex justify-between mt-3">
-    <button className="bg-[var(--btn)] hover:bg-[var(--btn-hover)] text-white px-3 py-1 rounded-[var(--radius)] transition">
-      {room.action}
-    </button>
-    <button
-      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-[var(--radius)] transition"
-      onClick={(e) => {
-        e.stopPropagation();
-        handleDeleteRoom(i);
-      }}
-    >
-      Delete
-    </button>
-  </div>
-</div>
-          ))}
-        
+    ${
+      selectedRoomIndex === i
+        ? "ring-2 ring-[var(--btn)] bg-[color-mix(in srgb,var(--btn)_10%,transparent)]"
+        : ""
+    }`}
+              >
+                <h3 className="text-lg font-bold">{room.name}</h3>
+                <p className="text-sm text-[var(--txt-dim)]">{room.category}</p>
+                <p className="text-sm text-[var(--txt-disabled)]">
+                  {room.description}
+                </p>
+                <div className="flex justify-between mt-3">
+                  <button className="bg-[var(--btn)] hover:bg-[var(--btn-hover)] text-white px-3 py-1 rounded-[var(--radius)] transition">
+                    {room.action}
+                  </button>
+                  <button
+                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-[var(--radius)] transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteRoom(i);
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
 
-{/* Create Room Card */}
-           <div
-  onClick={() => {
-    setSelectedRoomIndex(-1);
-    setShowModal(true);
-  }}
-  className={`cursor-pointer rounded-[var(--radius)] shadow-sm p-6 w-64 flex flex-col items-center justify-center
+            {/* Create Room Card */}
+            <div
+              onClick={() => {
+                setSelectedRoomIndex(-1);
+                setShowModal(true);
+              }}
+              className={`cursor-pointer rounded-[var(--radius)] shadow-sm p-6 w-64 flex flex-col items-center justify-center
     transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg
     bg-[var(--bg-sec)] text-[var(--txt-dim)] hover:bg-[var(--bg-ter)]
-    ${selectedRoomIndex === -1 ? 'ring-2 ring-[var(--btn)] bg-[color-mix(in srgb,var(--btn)_10%,transparent)]' : ''}`}
->
-  <span className="text-4xl font-bold text-[var(--btn)]">+</span>
-  <h3 className="mt-2 text-lg font-semibold text-[var(--txt)]">Create Room</h3>
-</div>
+    ${
+      selectedRoomIndex === -1
+        ? "ring-2 ring-[var(--btn)] bg-[color-mix(in srgb,var(--btn)_10%,transparent)]"
+        : ""
+    }`}
+            >
+              <span className="text-4xl font-bold text-[var(--btn)]">+</span>
+              <h3 className="mt-2 text-lg font-semibold text-[var(--txt)]">
+                Create Room
+              </h3>
+            </div>
           </div>
         </section>
-
 
         {/* Explore Rooms */}
         <section>
@@ -145,7 +177,11 @@ return (
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full max-w-sm mb-4 px-3 py-2 rounded-[var(--radius)] bg-[var(--bg-sec)] text-[var(--txt)] placeholder-[var(--txt-dim)] focus:outline-none focus:ring-2 focus:ring-[var(--btn)]"
           />
-          <FilterBar filters={filters} onFilter={setSelectedFilter} activeFilter={selectedFilter} />
+          <FilterBar
+            filters={filters}
+            onFilter={setSelectedFilter}
+            activeFilter={selectedFilter}
+          />
           <RoomList rooms={filteredRooms} />
         </section>
       </div>
@@ -154,18 +190,24 @@ return (
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
           <div className="bg-[var(--bg-sec)] p-6 rounded-[var(--radius)] shadow-lg w-96">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--txt)]">Create a New Room</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[var(--txt)]">
+              Create a New Room
+            </h3>
             <form onSubmit={handleCreateRoom} className="space-y-3">
               <input
                 type="text"
                 placeholder="Room Name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 className="w-full px-3 py-2 rounded-[var(--radius)] bg-[var(--bg-primary)] text-[var(--txt)] placeholder-[var(--txt-dim)] focus:outline-none focus:ring-2 focus:ring-[var(--btn)]"
               />
               <select
                 value={formData.category}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
                 className="w-full px-3 py-2 rounded-[var(--radius)] bg-[var(--bg-primary)] text-[var(--txt)] focus:outline-none focus:ring-2 focus:ring-[var(--btn)]"
               >
                 <option value="">Select Category</option>
@@ -178,7 +220,9 @@ return (
               <textarea
                 placeholder="Description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
                 className="w-full px-3 py-2 rounded-[var(--radius)] bg-[var(--bg-primary)] text-[var(--txt)] placeholder-[var(--txt-dim)] focus:outline-none focus:ring-2 focus:ring-[var(--btn)]"
               />
               <div className="flex justify-end gap-3">
