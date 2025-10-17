@@ -1,6 +1,8 @@
+// src/components/Sidebar.jsx
 import React, { useState, useRef, useEffect, forwardRef } from "react";
 import { motion } from "framer-motion";
-import Logo from "../assets/logo.jpg"
+import { useNavigate, useLocation } from "react-router-dom";
+import Logo from "../assets/logo.jpg";
 import {
   Home,
   Radio,
@@ -10,7 +12,6 @@ import {
   BadgeInfo,
   Settings,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 function Sidebar() {
   const [active, setActive] = useState("home");
@@ -18,8 +19,26 @@ function Sidebar() {
   const linkRefs = useRef({});
   const [indicatorPos, setIndicatorPos] = useState({ top: 0 });
   const navigate = useNavigate();
+  const location = useLocation();
 
-  // Update the purple indicator position when active item changes
+  // Map URL paths to sidebar IDs
+  const pathToId = {
+    "/": "home",
+    "/session": "session",
+    "/Page": "about",
+    "/stats": "stats",
+    "/notes": "notes",
+    "/attendance": "attendance",
+    "/settings": "settings",
+  };
+
+  // Sync active state with URL
+  useEffect(() => {
+    const currentId = pathToId[location.pathname];
+    if (currentId) setActive(currentId);
+  }, [location]);
+
+  // Update the purple indicator position when active changes
   useEffect(() => {
     const activeLink = linkRefs.current[active];
     if (sidebarRef.current && activeLink) {
@@ -36,12 +55,12 @@ function Sidebar() {
   }, [active]);
 
   // Single Sidebar Item
-  const SidebarLink = forwardRef(({ IconComponent, label, id, isActive }, ref) => {
+  const SidebarLink = forwardRef(({ IconComponent, label, id, onClick }, ref) => {
+    const isActive = active === id;
     return (
       <div
-        // to={to}
         ref={ref}
-        onClick={() => setActive(id)}
+        onClick={onClick}
         className={`relative flex flex-col items-center justify-center pt-2.5 pb-2 group cursor-pointer hover:bg-ter rounded-lg transition-colors`}
       >
         <IconComponent
@@ -49,9 +68,7 @@ function Sidebar() {
             isActive ? "text-white" : "text-gray-400 group-hover:text-white"
           }`}
         />
-        <span className="text-xs text-gray-400 group-hover:text-white">
-          {label}
-        </span>
+        <span className="text-xs text-gray-400 group-hover:text-white">{label}</span>
       </div>
     );
   });
@@ -64,60 +81,57 @@ function Sidebar() {
     >
       {/* Top Section */}
       <div>
-        {/* Logo */}
         <div className="hover:bg-ter rounded-lg transition-opacity duration-300">
           <img
             src={Logo}
             alt="Logo"
-            className={"w-32 mx-auto p-1 my-4 object-contain logo-filter opacity-100"}
+            className="w-32 mx-auto p-1 my-4 object-contain logo-filter opacity-100"
           />
-          
         </div>
 
-        {/* Menu Items */}
         <div className="space-y-2.5 2xl:space-y-4 mt-1 2xl:mt-2">
           <SidebarLink
             id="home"
             IconComponent={Home}
             label="Home"
-            isActive={active === "home"}
             ref={(el) => (linkRefs.current["home"] = el)}
+            onClick={() => navigate("/")}
           />
           <SidebarLink
             id="session"
             IconComponent={Radio}
             label="Session"
-            isActive={active === "session"}
             ref={(el) => (linkRefs.current["session"] = el)}
+            onClick={() => navigate("/session")}
           />
           <SidebarLink
             id="stats"
             IconComponent={BarChart2}
             label="Stats"
-            isActive={active === "stats"}
             ref={(el) => (linkRefs.current["stats"] = el)}
+            onClick={() => navigate("/stats")}
           />
           <SidebarLink
             id="notes"
             IconComponent={StickyNote}
             label="Notes"
-            isActive={active === "notes"}
             ref={(el) => (linkRefs.current["notes"] = el)}
+            onClick={() => navigate("/notes")}
           />
           <SidebarLink
             id="attendance"
             IconComponent={UserCheck}
             label="Attendance"
-            isActive={active === "attendance"}
             ref={(el) => (linkRefs.current["attendance"] = el)}
+            onClick={() => navigate("/attendance")}
           />
           <hr className="border-[var(--txt-disabled)] opacity-50 md:my-2.5 2xl:my-4 mx-4" />
           <SidebarLink
             id="about"
             IconComponent={BadgeInfo}
             label="About"
-            isActive={active === "about"}
             ref={(el) => (linkRefs.current["about"] = el)}
+            onClick={() => navigate("/Page")}
           />
         </div>
       </div>
@@ -128,8 +142,8 @@ function Sidebar() {
           id="settings"
           IconComponent={Settings}
           label="Settings"
-          isActive={active === "settings"}
           ref={(el) => (linkRefs.current["settings"] = el)}
+          onClick={() => navigate("/settings")}
         />
       </div>
 
