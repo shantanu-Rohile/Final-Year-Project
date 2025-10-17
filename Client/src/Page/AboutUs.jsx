@@ -10,7 +10,7 @@ export default function AboutUs() {
   ];
 
   return (
-    <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-10 px-6">
+    <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-10 px-6 ml-0 md:ml-[70px]">
       {/* Our Open Source Work */}
       <motion.section
         className="max-w-5xl mx-auto mb-16"
@@ -70,54 +70,52 @@ export default function AboutUs() {
         </ul>
       </motion.section>
 
-{/* Contributors */}
-<motion.section
-  className="max-w-5xl mx-auto mb-16"
-  initial={{ opacity: 0, y: 40 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.7 }}
-  viewport={{ once: true }}
->
-  <h2 className="text-3xl font-bold mb-6 text-center">
-    Built Together by Amazing People
-  </h2>
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-6 justify-items-center">
-    {contributors.map((user, index) => (
-      <motion.a
-        key={index}
-        href={`https://github.com/${user.name}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="relative bg-[--bg-sec] rounded-[--radius] shadow-md text-center py-6 px-4 cursor-pointer hover:bg-[--bg-ter] transition w-36 overflow-visible"
-        whileHover={{ scale: 1.05 }}
+      {/* Contributors */}
+      <motion.section
+        className="max-w-5xl mx-auto mb-16"
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7 }}
+        viewport={{ once: true }}
       >
-        {/* Avatar */}
-        <div className="relative w-20 h-20 mx-auto mb-3">
-          <img
-            src={`https://github.com/${user.name}.png`}
-            alt={user.name}
-            className="w-20 h-20 rounded-full border-2 border-[--bg-ter] shadow-sm"
-          />
-          {/* Contribution Badge with pulse */}
-          <motion.span
-            className="absolute -top-2 -right-2 bg-[--btn] text-[--txt] text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(107,33,168,0.6)]"
-            whileHover={{
-              scale: [1, 1.3, 1],
-              boxShadow: "0 0 15px rgba(107,33,168,0.9)",
-              transition: { duration: 0.6, repeat: Infinity },
-            }}
-          >
-            {user.contributions}
-          </motion.span>
+        <h2 className="text-3xl font-bold mb-6 text-center">
+          Built Together by Amazing People
+        </h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-6 justify-items-center">
+          {contributors.map((user, index) => (
+            <motion.a
+              key={index}
+              href={`https://github.com/${user.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative bg-[--bg-sec] rounded-[--radius] shadow-md text-center py-6 px-4 cursor-pointer hover:bg-[--bg-ter] transition w-36 overflow-visible"
+              whileHover={{ scale: 1.05 }}
+            >
+              {/* Avatar */}
+              <div className="relative w-20 h-20 mx-auto mb-3">
+                <img
+                  src={`https://github.com/${user.name}.png`}
+                  alt={user.name}
+                  className="w-20 h-20 rounded-full border-2 border-[--bg-ter] shadow-sm"
+                />
+                {/* Contribution Badge with pulse */}
+                <motion.span
+                  className="absolute -top-2 -right-2 bg-[--btn] text-[--txt] text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full shadow-[0_0_10px_rgba(107,33,168,0.6)]"
+                  whileHover={{
+                    scale: [1, 1.3, 1],
+                    boxShadow: "0 0 15px rgba(107,33,168,0.9)",
+                    transition: { duration: 0.6, repeat: Infinity },
+                  }}
+                >
+                  {user.contributions}
+                </motion.span>
+              </div>
+              <h3 className="font-semibold text-lg">{user.name}</h3>
+              <p className="text-[--txt-disabled] text-sm">Contributions</p>
+            </motion.a>
+          ))}
         </div>
-        <h3 className="font-semibold text-lg">{user.name}</h3>
-        <p className="text-[--txt-disabled] text-sm">Contributions</p>
-      </motion.a>
-    ))}
-  </div>
-</motion.section>
-
-
+      </motion.section>
 
       {/* Final Section */}
       <motion.section

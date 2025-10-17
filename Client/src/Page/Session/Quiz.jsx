@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, AlertCircle } from 'lucide-react';
 import QuestionCard from '../../Components/QuestionCard';
 import Leaderboard from '../../Components/Leaderboard';
+import Lobby from '../Session/lobby'
 import {
   mockQuizData,
   mockPreviousUsers,
