@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom"; 
 import RoomList from "../Components/Session/RoomList";
 import FilterBar from "../Components/Session/FilterBar";
 import Sidebar from "../Components/Sidebar";
@@ -42,6 +43,8 @@ const categories = [
 const filters = ["All", ...categories];
 
 const RoomsPage = () => {
+  const navigate = useNavigate(); 
+
   const [yourRooms, setYourRooms] = useState(initialYourRooms);
   const [allRooms] = useState(allRoomsData);
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -52,6 +55,7 @@ const RoomsPage = () => {
     category: "",
     description: "",
   });
+  const [selectedRoomIndex, setSelectedRoomIndex] = useState(null);
 
   // Load from localStorage
   useEffect(() => {
@@ -75,6 +79,7 @@ const RoomsPage = () => {
     return matchesCategory && matchesSearch;
   });
 
+  
   const handleCreateRoom = (e) => {
     e.preventDefault();
     if (!formData.name || !formData.category) return;
@@ -89,15 +94,14 @@ const RoomsPage = () => {
     setYourRooms([...yourRooms, newRoom]);
     setFormData({ name: "", category: "", description: "" });
     setShowModal(false);
+
+    navigate("/lobby"); // Lobby 
   };
 
   const handleDeleteRoom = (index) => {
     const updatedRooms = yourRooms.filter((_, i) => i !== index);
     setYourRooms(updatedRooms);
   };
-
-  // state at the top of your component
-  const [selectedRoomIndex, setSelectedRoomIndex] = useState(null);
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
@@ -128,7 +132,13 @@ const RoomsPage = () => {
                   {room.description}
                 </p>
                 <div className="flex justify-between mt-3">
-                  <button className="bg-[var(--btn)] hover:bg-[var(--btn-hover)] text-white px-3 py-1 rounded-[var(--radius)] transition">
+                  <button
+                    className="bg-[var(--btn)] hover:bg-[var(--btn-hover)] text-white px-3 py-1 rounded-[var(--radius)] transition"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate("/quiz-test/:roomId"); // ✅ Static path
+                    }}
+                  >
                     {room.action}
                   </button>
                   <button
@@ -149,6 +159,7 @@ const RoomsPage = () => {
               onClick={() => {
                 setSelectedRoomIndex(-1);
                 setShowModal(true);
+
               }}
               className={`cursor-pointer rounded-[var(--radius)] shadow-sm p-6 w-64 flex flex-col items-center justify-center
     transition duration-300 ease-in-out transform hover:-translate-y-1 hover:scale-105 hover:shadow-lg
@@ -182,7 +193,12 @@ const RoomsPage = () => {
             onFilter={setSelectedFilter}
             activeFilter={selectedFilter}
           />
-          <RoomList rooms={filteredRooms} />
+          <RoomList
+            rooms={filteredRooms.map((room) => ({
+              ...room,
+              onEnter: () => navigate("/quiz-test/:roomId"), // ✅ static path
+            }))}
+          />
         </section>
       </div>
 

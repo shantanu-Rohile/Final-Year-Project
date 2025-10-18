@@ -12,7 +12,7 @@ import RoomPage from "./Page/RoomsPage";
 import QuizTest from "./Page/Session/Quiz";
 import FinalLeaderboard from "./Page/Session/FinalLeaderboard";
 import AboutUs from "./Page/AboutUs";
-
+import Lobby from './Page/Session/lobby'
 function App() {
   return (
     <Router>
@@ -24,6 +24,7 @@ function App() {
           <Route path="/Page" element={<AboutUs />} />
           <Route path="/quiz-test/:roomId" element={<QuizTest />} />
           <Route path="/final-leaderboard" element={<FinalLeaderboard />} />
+          <Route path="/lobby" element={<Lobby />} />
         </Route>
 
         {/* Routes without Sidebar */}

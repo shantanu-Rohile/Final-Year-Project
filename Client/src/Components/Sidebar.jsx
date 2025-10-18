@@ -2,7 +2,7 @@
 import React, { useState, useRef, useEffect, forwardRef } from "react";
 import { motion } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import Logo from "../assets/logo.jpg";
+import Logo from "../assets/logo.png";
 import {
   Home,
   Radio,
