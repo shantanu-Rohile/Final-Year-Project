@@ -18,23 +18,21 @@ export default function AboutUs() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
       >
-        <h2 className="text-3xl font-bold mb-6">Our Open-Source Work</h2>
-        <p className="text-[--txt-dim] leading-relaxed mb-6">
-          <span className="font-semibold">EduQuest</span> is an interactive learning
-          platform built to transform assessments into engaging experiences. It
-          enables <strong>real-time quizzes</strong>, <strong>personalized question banks</strong>,
-          <strong> leaderboards</strong>, and <strong>performance analytics</strong>.
-          Designed for both students and educators, EduQuest makes learning
-          social, competitive, and fun while ensuring meaningful insights into
-          knowledge progress.
-        </p>
+        <h2 className="text-3xl font-bold mb-6">About EduQuest</h2>
+<p className="text-[--txt-dim] leading-relaxed mb-6">
+  <span className="font-semibold">EduQuest</span> is an interactive learning
+  platform designed to transform assessments into engaging experiences. It
+  offers <strong>real-time quizzes</strong>, <strong>personalized question banks</strong>,
+  <strong>leaderboards</strong>, and <strong>performance analytics</strong>.
+  Built for both students and educators, EduQuest makes learning
+  social, competitive, and fun while providing meaningful insights into
+  knowledge progress.
+</p>
+
 
         {/* GitHub Stats Card */}
-        <GitHubStats
-          repoUrl="https://github.com/shantanu-Rohile/Final-Year-Project.git"
-          forks={210}
-          stars={69}
-        />
+<GitHubStats repoUrl="https://github.com/shantanu-Rohile/Final-Year-Project.git" />
+
       </motion.section>
 
       {/* Idea Behind EduQuest */}
