@@ -78,8 +78,8 @@ export default function HostDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--txt)] px-6 py-10 font-[Inter]">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--txt)] px-6 py-10 font-[Inter] ">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 ml-[70px]">
         {/* LEFT PANEL */}
         <div className="bg-[var(--bg-sec)] rounded-[var(--radius)] shadow-sm p-6 transition hover:shadow-lg">
           <h2 className="text-lg font-semibold mb-6 text-[var(--txt)]">

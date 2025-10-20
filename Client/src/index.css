@@ -3,7 +3,7 @@
 @tailwind components;
 
 /* EduQuest – Sky Minimal Theme */
-@theme {
+/* @theme {
   --bg-primary: #111827;
   --bg-sec: #1f2937;
   --bg-ter: #374151;
@@ -15,10 +15,23 @@
   --btn-hover: #7a24c1;
   --logo-invert: 1;
   --shadow-rgb: 107, 33, 168;
-}
+} */
 
-/*@layer base  {
-  .dark{
+@layer base {
+  :root {
+    --bg-primary: #dfddec;
+    --bg-sec: #edecf2;
+    --bg-ter: #ffffff;
+    --txt: #1f2937;
+    --txt-dim: #525f70;
+    --txt-disabled: #888888;
+    --radius: 0.5rem;
+    --btn: #7f23ca;
+    --btn-hover: #8f30de;
+    --shadow-rgb: 127, 35, 202; /* Default shadow RGB */
+  }
+
+  .dark {
     --bg-primary: #111827;
     --bg-sec: #1f2937;
     --bg-ter: #374151;
@@ -29,20 +42,306 @@
     --btn: #6b21a8;
     --btn-hover: #7a24c1;
     --logo-invert: 1;
-    --shadow-rgb: 107, 33, 168; 
+    --shadow-rgb: 107, 33, 168; /* Dark theme shadow RGB */
   }
-    
-  .light {
+  .theme-space-black {
+    --bg-primary: #000000;
+    --bg-sec: #181818;
+    --bg-ter: #1f1f1f;
+    --txt: #e5e5e5;
+    --txt-dim: #a3a3a3;
+    --txt-disabled: #525252;
+    --btn: #6343ac;
+    --btn-hover: #7c3aed;
+    --logo-invert: 1;
+    --shadow-rgb: 99, 67, 172; /* Space Black shadow RGB */
+  }
+  .theme-cyberpunk {
+    --bg-primary: #0f0f0f;
+    --bg-sec: #1f1f1f;
+    --bg-ter: #2e2e2e;
+    --txt: #00ffe0;
+    --txt-dim: #00c6ff;
+    --txt-disabled: #005566;
+    --btn: #ff00c8;
+    --btn-hover: #ff33d4;
+    --logo-invert: 1;
+    --shadow-rgb: 255, 0, 200; /* Cyberpunk shadow RGB */
+  }
+
+  .theme-forest {
+    --bg-primary: #07110e;
+    --bg-sec: #12241c;
+    --bg-ter: #1d4635;
+    --txt: #e0ffe0;
+    --txt-dim: #a3d8a3;
+    --txt-disabled: #6a9c6a;
+    --btn: #38a169;
+    --btn-hover: #2f855a;
+    --logo-invert: 1;
+    --shadow-rgb: 56, 161, 105; /* Forest shadow RGB */
+  }
+
+  .theme-coffee {
+    --bg-primary: #180f09;
+    --bg-sec: #2c2013;
+    --bg-ter: #463425;
+    --txt: #f4e9d8;
+    --txt-dim: #d6c4aa;
+    --txt-disabled: #a89f91;
+    --btn: #a9745f;
+    --btn-hover: #b8836e;
+    --logo-invert: 1;
+    --shadow-rgb: 169, 116, 95; /* Coffee shadow RGB */
+  }
+  .theme-neon-sunset {
+    --bg-primary: #0a0a0f;
+    --bg-sec: #1a0e2e;
+    --bg-ter: #2d1b47;
+    --txt: #ff6b9d;
+    --txt-dim: #ff9a00;
+    --txt-disabled: #8b5a8c;
+    --btn: #00d4ff;
+    --btn-hover: #33ddff;
+    --logo-invert: 1;
+    --shadow-rgb: 0, 212, 255; /* Neon Sunset shadow RGB */
+  }
+
+  /* Ocean Breeze (Light) */
+  .theme-ocean-breeze {
+    --bg-primary: #f0f9ff;
+    --bg-sec: #e0f2fe;
+    --bg-ter: #ffffff;
+    --txt: #0c4a6e;
+    --txt-dim: #0369a1;
+    --txt-disabled: #64748b;
+    --btn: #0ea5e9;
+    --btn-hover: #0284c7;
+    --logo-invert: 0;
+    --shadow-rgb: 14, 165, 233; /* Ocean Breeze shadow RGB */
+  }
+
+  /* Volcanic (Dark) */
+  .theme-volcanic {
+    --bg-primary: #140700;
+    --bg-sec: #29160c;
+    --bg-ter: #3b261c;
+    --txt: #ffe2d8;
+    --txt-dim: #ffc386;
+    --txt-disabled: #996633;
+    --btn: #dc2626;
+    --btn-hover: #ef4444;
+    --logo-invert: 1;
+    --shadow-rgb: 220, 38, 38; /* Volcanic shadow RGB */
+  }
+
+  /* Mint Dream (Light) */
+  .theme-mint-dream {
+    --bg-primary: #f0fdf4;
+    --bg-sec: #dcfce7;
+    --bg-ter: #ffffff;
+    --txt: #14532d;
+    --txt-dim: #166534;
+    --txt-disabled: #6b7280;
+    --btn: #10b981;
+    --btn-hover: #059669;
+    --logo-invert: 0;
+    --shadow-rgb: 16, 185, 129; /* Mint Dream shadow RGB */
+  }
+  /* Rose Gold (Light) */
+  .theme-rose-gold {
+    --bg-primary: #fef7f7;
+    --bg-sec: #fce7e7;
+    --bg-ter: #ffd1d1;
+    --txt: #7c2d12;
+    --txt-dim: #a3542f;
+    --txt-disabled: #78716c;
+    --btn: #e11d48;
+    --btn-hover: #be185d;
+    --logo-invert: 0;
+    --shadow-rgb: 225, 29, 72; /* Rose Gold shadow RGB */
+  }
+
+  /* Matrix (Dark) */
+  .theme-matrix {
+    --bg-primary: #000000;
+    --bg-sec: #012201;
+    --bg-ter: #003500;
+    --txt: #21ff21;
+    --txt-dim: #00a700;
+    --txt-disabled: #004400;
+    --btn: #00a028;
+    --btn-hover: #00ff66;
+    --logo-invert: 1;
+    --shadow-rgb: 0, 160, 40; /* Matrix shadow RGB */
+  }
+
+  /* Lavender Fields (Light) */
+  .theme-lavender-fields {
     --bg-primary: #faf5ff;
     --bg-sec: #f3e8ff;
     --bg-ter: #ffffff;
     --txt: #581c87;
     --txt-dim: #7c3aed;
     --txt-disabled: #6b7280;
-    --radius: 0.5rem;
     --btn: #8b5cf6;
     --btn-hover: #7c3aed;
     --logo-invert: 0;
-    --shadow-rgb: 139, 92, 246;
+    --shadow-rgb: 139, 92, 246; /* Lavender Fields shadow RGB */
   }
-} */
+
+  /* Midnight Blue (Dark) */
+  .theme-midnight-blue {
+    --bg-primary: #020617;
+    --bg-sec: #0f172a;
+    --bg-ter: #1e293b;
+    --txt: #cbd5e1;
+    --txt-dim: #94a3b8;
+    --txt-disabled: #475569;
+    --btn: #3b82f6;
+    --btn-hover: #2563eb;
+    --logo-invert: 1;
+    --shadow-rgb: 59, 130, 246; /* Midnight Blue shadow RGB */
+  }
+
+  /* Peachy Keen (Light) */
+  .theme-peachy-keen {
+    --bg-primary: #fff7ed;
+    --bg-sec: #ffedd5;
+    --bg-ter: #ffffff;
+    --txt: #9a3412;
+    --txt-dim: #c2410c;
+    --txt-disabled: #6b7280;
+    --btn: #ea580c;
+    --btn-hover: #dc2626;
+    --logo-invert: 0;
+    --shadow-rgb: 234, 88, 12; /* Peachy Keen shadow RGB */
+  }
+
+  /* Creamsicle (Light) */
+  .theme-creamsicle {
+    --bg-primary: #fffbeb;
+    --bg-sec: #fef3c7;
+    --bg-ter: #ffffff;
+    --txt: #92400e;
+    --txt-dim: #b45309;
+    --txt-disabled: #6b7280;
+    --btn: #f59e0b;
+    --btn-hover: #d97706;
+    --logo-invert: 0;
+    --shadow-rgb: 245, 158, 11; /* Creamsicle shadow RGB */
+  }
+
+  /* Obsidian (Dark) */
+  .theme-obsidian {
+    --bg-primary: #0c0c0c;
+    --bg-sec: #1c1c1c;
+    --bg-ter: #2c2c2c;
+    --txt: #e5e5e5;
+    --txt-dim: #b3b3b3;
+    --txt-disabled: #666666;
+    --btn: #ff6b35;
+    --btn-hover: #ff8c69;
+    --logo-invert: 1;
+    --shadow-rgb: 255, 107, 53; /* Obsidian shadow RGB */
+  }
+
+  /* Cotton Candy (Light) */
+  .theme-cotton-candy {
+    --bg-primary: #fdf2f8;
+    --bg-sec: #fce7f3;
+    --bg-ter: #ffffff;
+    --txt: #be185d;
+    --txt-dim: #e11d48;
+    --txt-disabled: #6b7280;
+    --btn: #ec4899;
+    --btn-hover: #db2777;
+    --logo-invert: 0;
+    --shadow-rgb: 236, 72, 153; /* Cotton Candy shadow RGB */
+  }
+
+  /* Neon Jungle (Dark) */
+  .theme-neon-jungle {
+    --bg-primary: #0a1a0a;
+    --bg-sec: #1a2e1a;
+    --bg-ter: #2d4a2d;
+    --txt: #39ff14;
+    --txt-dim: #00ff88;
+    --txt-disabled: #2d5a2d;
+    --btn: #ff1493;
+    --btn-hover: #ff69b4;
+    --logo-invert: 1;
+    --shadow-rgb: 255, 20, 147; /* Neon Jungle shadow RGB */
+  }
+
+  /* Golden Hour (Light) */
+  .theme-golden-hour {
+    --bg-primary: #fff8e1;
+    --bg-sec: #ffecb3;
+    --bg-ter: #ffffff;
+    --txt: #bf360c;
+    --txt-dim: #e65100;
+    --txt-disabled: #8d6e63;
+    --btn: #ff9800;
+    --btn-hover: #f57c00;
+    --logo-invert: 0;
+    --shadow-rgb: 255, 152, 0; /* Golden Hour shadow RGB */
+  }
+
+  /* Sapphire Dream (Dark) */
+  .theme-sapphire-dream {
+    --bg-primary: #0a0a2e;
+    --bg-sec: #16213e;
+    --bg-ter: #1e3a5f;
+    --txt: #87ceeb;
+    --txt-dim: #add8e6;
+    --txt-disabled: #4682b4;
+    --btn: #4169e1;
+    --btn-hover: #6495ed;
+    --logo-invert: 1;
+    --shadow-rgb: 65, 105, 225; /* Sapphire Dream shadow RGB */
+  }
+
+  /* Coral Reef (Light) */
+  .theme-coral-reef {
+    --bg-primary: #fff5f5;
+    --bg-sec: #fed7d7;
+    --bg-ter: #ffc1c1;
+    --txt: #c53030;
+    --txt-dim: #e53e3e;
+    --txt-disabled: #718096;
+    --btn: #f56565;
+    --btn-hover: #e53e3e;
+    --logo-invert: 0;
+    --shadow-rgb: 245, 101, 101; /* Coral Reef shadow RGB */
+  }
+
+  /* Deep Purple (Dark) */
+  .theme-deep-purple {
+    --bg-primary: #100020;
+    --bg-sec: rgb(32, 20, 49);
+    --bg-ter: #312557;
+    --txt: #ddd6fe;
+    --txt-dim: #c4b5fd;
+    --txt-disabled: #8b5cf6;
+    --btn: #a855f7;
+    --btn-hover: #9333ea;
+    --logo-invert: 1;
+    --shadow-rgb: 168, 85, 247; /* Deep Purple shadow RGB */
+  }
+
+  /* Arctic Mint (Light) */
+  .theme-arctic-mint {
+    --bg-primary: #f0fdfa;
+    --bg-sec: #ccfbf1;
+    --bg-ter: #ffffff;
+    --txt: #134e4a;
+    --txt-dim: #0f766e;
+    --txt-disabled: #6b7280;
+    --btn: #14b8a6;
+    --btn-hover: #0d9488;
+    --logo-invert: 0;
+    --shadow-rgb: 20, 184, 166; /* Arctic Mint shadow RGB */
+  }
+
+} 

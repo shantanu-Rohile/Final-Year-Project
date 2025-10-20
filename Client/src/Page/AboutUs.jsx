@@ -10,7 +10,7 @@ export default function AboutUs() {
   ];
 
   return (
-    <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-10 px-6 ml-0 md:ml-[70px]">
+    <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-8 px-6 ml-0 ml-[70px]">
       {/* Our Open Source Work */}
       <motion.section
         className="max-w-5xl mx-auto mb-16"

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; 
 import RoomList from "../Components/Session/RoomList";
 import FilterBar from "../Components/Session/FilterBar";
-import Sidebar from "../Components/Sidebar";
 
 const initialYourRooms = [
   {
@@ -15,9 +14,9 @@ const initialYourRooms = [
 
 const allRoomsData = [
   {
-    name: "hbhcjsd",
+    name: "Sandesh GYM",
     category: "Hobbies",
-    description: "sdkfhcbsd",
+    description: "Join to discuss workout routines and fitness tips.",
     action: "Request Join",
   },
   {
@@ -105,7 +104,6 @@ const RoomsPage = () => {
 
   return (
     <div className="flex min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
-      <Sidebar />
       <div className="flex-1 p-6 overflow-y-auto ml-[70px]">
         {/* Your Rooms */}
         <section className="mb-10">
