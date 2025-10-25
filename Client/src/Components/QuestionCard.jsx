@@ -81,7 +81,7 @@ const QuestionCard = ({
       </motion.div>
 
       {/* Question Card */}
-      <motion.div
+      <div
         className="p-6 rounded-xl shadow-2xl"
         style={{
           backgroundColor: "var(--bg-sec)",
@@ -179,7 +179,7 @@ const QuestionCard = ({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     </motion.div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Home, Calendar, Users, Target, Plus, Search } from "lucide-react";
+import { Home, Calendar, Users, Target, Plus, Search, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 
@@ -208,9 +208,9 @@ export default function Dashboard() {
 
         {/* Recent Rooms */}
         <section className="bg-[var(--bg-sec)] shadow-sm rounded-[var(--radius)] p-5 hover:shadow-md transition">
-          <h2 className="font-semibold mb-4 text-[var(--txt)]">
-            <icon className="fas fa-door-open text-[var(--btn)] w-5 h-5 mb-2"></icon>{" "}
-            Recent Rooms
+          <h2 className="font-semibold mb-4 text-[var(--txt)] flex items-center gap-2">
+            {/* <icon className="fas fa-door-open text-[var(--btn)] w-5 h-5 mb-2"></icon>{" "} */}
+            <LogOut className="w-5 h-5 text-[var(--btn)] " /> Recent Rooms
           </h2>
           <div className="space-y-3">
             {[

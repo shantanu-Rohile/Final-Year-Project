@@ -10,7 +10,7 @@ export default function AboutUs() {
   ];
 
   return (
-    <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-8 px-6 ml-0 ml-[70px]">
+    <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-8 px-5 ml-[70px] text-justify">
       {/* Our Open Source Work */}
       <motion.section
         className="max-w-5xl mx-auto mb-16"
@@ -19,20 +19,19 @@ export default function AboutUs() {
         transition={{ duration: 0.7 }}
       >
         <h2 className="text-3xl font-bold mb-6">About EduQuest</h2>
-<p className="text-[--txt-dim] leading-relaxed mb-6">
-  <span className="font-semibold">EduQuest</span> is an interactive learning
-  platform designed to transform assessments into engaging experiences. It
-  offers <strong>real-time quizzes</strong>, <strong>personalized question banks</strong>,
-  <strong>leaderboards</strong>, and <strong>performance analytics</strong>.
-  Built for both students and educators, EduQuest makes learning
-  social, competitive, and fun while providing meaningful insights into
-  knowledge progress.
-</p>
-
+        <p className="text-[--txt-dim] leading-relaxed mb-6">
+          <span className="font-semibold">EduQuest</span> is an interactive
+          learning platform designed to transform assessments into engaging
+          experiences. It offers <strong>real-time quizzes</strong>,{" "}
+          <strong>personalized question banks</strong>,
+          <strong>leaderboards</strong>, and{" "}
+          <strong>performance analytics</strong>. Built for both students and
+          educators, EduQuest makes learning social, competitive, and fun while
+          providing meaningful insights into knowledge progress.
+        </p>
 
         {/* GitHub Stats Card */}
-<GitHubStats repoUrl="https://github.com/shantanu-Rohile/Final-Year-Project.git" />
-
+        <GitHubStats repoUrl="https://github.com/shantanu-Rohile/Final-Year-Project.git" />
       </motion.section>
 
       {/* Idea Behind EduQuest */}
@@ -46,24 +45,27 @@ export default function AboutUs() {
         <h2 className="text-3xl font-bold mb-6">Idea Behind EduQuest</h2>
         <ul className="list-disc list-inside text-[--txt-dim] space-y-3">
           <li>
-            During our college days, we noticed that most learning platforms were
-            either <strong>boring</strong> or <strong>focused only on grading</strong>,
-            with little room for collaboration and fun.
+            During our college days, we noticed that most learning platforms
+            were either <strong>boring</strong> or{" "}
+            <strong>focused only on grading</strong>, with little room for
+            collaboration and fun.
           </li>
           <li>
-            Existing quiz tools lacked <strong>real-time interaction</strong> and{" "}
-            <strong>gamification</strong>, making assessments feel like a burden
-            rather than a challenge.
+            Existing quiz tools lacked <strong>real-time interaction</strong>{" "}
+            and <strong>gamification</strong>, making assessments feel like a
+            burden rather than a challenge.
           </li>
           <li>
-            That’s why we built <strong>EduQuest</strong> – a platform that blends{" "}
-            <strong>quizzes, gamification, and collaboration</strong> into one
-            experience.
+            That’s why we built <strong>EduQuest</strong> – a platform that
+            blends <strong>quizzes, gamification, and collaboration</strong>{" "}
+            into one experience.
           </li>
           <li>
-            With <strong>live quiz rooms</strong>, <strong>interactive challenges</strong>, 
-            <strong> leaderboards</strong>, and <strong>analytics-driven insights</strong>, 
-            EduQuest makes assessments something to look forward to.
+            With <strong>live quiz rooms</strong>,{" "}
+            <strong>interactive challenges</strong>,
+            <strong> leaderboards</strong>, and{" "}
+            <strong>analytics-driven insights</strong>, EduQuest makes
+            assessments something to look forward to.
           </li>
         </ul>
       </motion.section>
@@ -125,9 +127,9 @@ export default function AboutUs() {
       >
         <h2 className="text-2xl font-bold mb-4">🚀 Explore More</h2>
         <p className="text-[--txt-dim] mb-6">
-          EduQuest is constantly evolving with the help of our amazing community.{" "}
-          Whether you’re a student, educator, or developer — you can be a part of
-          this journey.
+          EduQuest is constantly evolving with the help of our amazing
+          community. Whether you’re a student, educator, or developer — you can
+          be a part of this journey.
         </p>
 
         <div className="flex flex-wrap gap-4 justify-center">

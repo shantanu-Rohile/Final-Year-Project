@@ -1,5 +1,5 @@
 // pages/Settings.jsx
-import React from "react";
+import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Palette, User } from "lucide-react";
@@ -9,6 +9,9 @@ import Account from "../Components/Settings/Account";
 const Settings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const currentTab = searchParams.get("tab") || "themes";
+
+  // ✅ Sidebar toggle for mobile
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Sidebar menu items
   const menuItems = [
@@ -23,24 +26,64 @@ const Settings = () => {
 
   return (
     <div
-      className="min-h-screen flex h-screen"
-      style={{ backgroundColor: "var(--bg-primary)" }}
+      className="min-h-screen flex flex-col md:flex-row h-screen ml-[70px]"
+      style={{ backgroundColor: "var(--bg-sec)" }}
     >
-      {/* Settings Sidebar */}
+      {/* ✅ Mobile Header */}
       <div
-        className="w-64 md:w-72 ml-[70px] p-6 border-r"
+        className="flex items-center justify-between p-4 border-b md:hidden"
         style={{
+          borderColor: "var(--bg-ter)",
           backgroundColor: "var(--bg-sec)",
+        }}
+      >
+        <h1 className="text-xl font-bold" style={{ color: "var(--txt)" }}>
+          Settings
+        </h1>
+        <button
+          onClick={() => setIsSidebarOpen((prev) => !prev)}
+          className="p-2 rounded-lg transition-colors duration-200"
+          style={{
+            backgroundColor: "var(--bg-ter)",
+            color: "var(--txt)",
+          }}
+          aria-label="Toggle menu"
+        >
+          <i className="ri-menu-line text-xl" />
+        </button>
+      </div>
+
+      {/* ✅ Sidebar */}
+      <div
+        className={`fixed md:static top-0 left-0 h-full w-60 p-6 border-r z-20
+          ${
+            isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+          } md:translate-x-0`}
+        style={{
+          backgroundColor: "var(--bg-primary)",
           borderColor: "var(--bg-ter)",
         }}
       >
-        <h1
-          className="text-2xl md:text-3xl font-bold mb-8"
-          style={{ color: "var(--txt)" }}
-        >
+        {/* Close button on mobile */}
+        <h1 className="px-4 text-2xl font-bold pb-2" style={{ color: "var(--txt)" }}>
           Settings
         </h1>
+        <hr className="border-[var(--txt-disabled)] opacity-50 pb-4" />
+        <div className="flex items-center justify-between mb-6 md:hidden">
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="p-2 rounded-lg transition-colors duration-200"
+            style={{
+              backgroundColor: "var(--bg-ter)",
+              color: "var(--txt)",
+            }}
+            aria-label="Close menu"
+          >
+            <i className="ri-close-line text-xl" />
+          </button>
+        </div>
 
+        {/* Sidebar Navigation */}
         <nav className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -49,13 +92,16 @@ const Settings = () => {
             return (
               <motion.button
                 key={item.id}
-                onClick={() => handleTabChange(item.id)}
+                onClick={() => {
+                  handleTabChange(item.id);
+                  setIsSidebarOpen(false); // auto-close on mobile
+                }}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   isActive ? "font-semibold" : ""
                 }`}
                 style={{
                   backgroundColor: isActive ? "var(--btn)" : "transparent",
-                  color: isActive ? "white" : "var(--txt)",
+                  color: isActive ? "#fff" : "var(--txt)",
                 }}
                 whileHover={{
                   scale: 1.02,
@@ -73,8 +119,8 @@ const Settings = () => {
         </nav>
       </div>
 
-      {/* Main Content Area */}
-      <div className="flex-1 p-6 md:p-8 lg:p-8 overflow-y-auto">
+      {/* ✅ Main Content Area */}
+      <div className="flex-1 p-4 md:p-8 overflow-y-auto">
         <motion.div
           key={currentTab}
           initial={{ opacity: 0, y: 20 }}
@@ -85,6 +131,14 @@ const Settings = () => {
           {currentTab === "account" && <Account />}
         </motion.div>
       </div>
+
+      {/* ✅ Mobile Overlay (when sidebar open) */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
     </div>
   );
 };

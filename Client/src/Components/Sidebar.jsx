@@ -38,7 +38,7 @@ function Sidebar() {
     if (currentId) setActive(currentId);
   }, [location]);
 
-  // Update the purple indicator position when active changes
+  // Update indicator position when active changes
   useEffect(() => {
     const activeLink = linkRefs.current[active];
     if (sidebarRef.current && activeLink) {
@@ -54,21 +54,27 @@ function Sidebar() {
     }
   }, [active]);
 
-  // Single Sidebar Item
+  // Sidebar Link component
   const SidebarLink = forwardRef(({ IconComponent, label, id, onClick }, ref) => {
     const isActive = active === id;
     return (
       <div
         ref={ref}
         onClick={onClick}
-        className={`relative flex flex-col items-center justify-center pt-2.5 pb-2 group cursor-pointer hover:bg-ter rounded-lg transition-colors`}
+        className={`relative flex flex-col items-center justify-center pt-2.5 pb-2 group cursor-pointer 
+          hover:bg-[var(--bg-ter)] rounded-[var(--radius)] transition-colors`}
       >
         <IconComponent
-          className={`size-5 2xl:size-6 transition-colors duration-300 ${
-            isActive ? "text-white" : "text-gray-400 group-hover:text-white"
-          }`}
+          className={`size-5 2xl:size-6 transition-colors duration-300 
+            ${
+              isActive
+                ? "text-[var(--txt)]"
+                : "text-[var(--txt-dim)] group-hover:text-[var(--txt)]"
+            }`}
         />
-        <span className="text-xs text-gray-400 group-hover:text-white">{label}</span>
+        <span className="text-xs text-[var(--txt-dim)] group-hover:text-[var(--txt)]">
+          {label}
+        </span>
       </div>
     );
   });
@@ -77,15 +83,18 @@ function Sidebar() {
   return (
     <nav
       ref={sidebarRef}
-      className="w-[70px] border-r border-gray-500/20 p-1 flex flex-col items-center justify-between fixed top-0 left-0 h-screen bg-[#0E1420]"
+      className="w-[70px] border-r border-[color:rgba(var(--shadow-rgb),0.2)] 
+        p-1 flex flex-col items-center justify-between fixed top-0 left-0 h-screen 
+        bg-[var(--bg-sec)] transition-colors duration-300"
     >
       {/* Top Section */}
       <div>
-        <div className="hover:bg-ter rounded-lg transition-opacity duration-300">
+        <div className="hover:bg-[var(--bg-ter)] rounded-[var(--radius)] transition-opacity duration-300">
           <img
             src={Logo}
             alt="Logo"
             className="w-32 mx-auto p-1 my-4 object-contain logo-filter opacity-100"
+            style={{ filter: "invert(var(--logo-invert, 0))" }}
           />
         </div>
 
@@ -147,11 +156,11 @@ function Sidebar() {
         />
       </div>
 
-      {/* Purple Active Indicator */}
+      {/* Active Indicator */}
       <motion.span
-        className="absolute left-1 h-8 w-1 rounded-full bg-purple-500"
+        className="absolute left-1 h-8 w-1 rounded-full bg-[var(--btn)] shadow-[0_0_10px_rgba(var(--shadow-rgb),0.6)]"
         animate={{ top: indicatorPos.top }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       />
     </nav>
   );
