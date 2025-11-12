@@ -1,5 +1,9 @@
-# dependencies
+# Dependencies
 node_modules/
+
+# Environment variables
+.env
+.env.local
 
 # Logs
 logs
@@ -10,13 +14,15 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
+# Build outputs
 dist
 dist-ssr
+
+# Local environment files
 *.local
+
+# Temporary or test files
 Test.jsx
-.env
-.env.local
 
 # Editor directories and files
 .vscode/*
