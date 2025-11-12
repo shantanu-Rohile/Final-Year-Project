@@ -190,6 +190,7 @@
     --shadow-rgb: 139, 92, 246; /* Lavender Fields shadow RGB */
   }
 
+
   /* Midnight Blue (Dark) */
   .theme-midnight-blue {
     --bg-primary: #020617;
@@ -345,3 +346,12 @@
   }
 
 } 
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-[#0f0f1a] text-gray-100;
+}
+

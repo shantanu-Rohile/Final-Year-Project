@@ -1,46 +1,117 @@
-import React, { useState } from "react";
-import { Home, Calendar, Users, Target, Plus, Search, LogOut } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Calendar, Target, Plus, Search, LogOut } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../Components/Sidebar";
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [goals, setGoals] = useState([
-    { id: 1, text: "Complete Math Assignment", completed: false },
-    { id: 2, text: "Review Science Notes", completed: true },
-    { id: 3, text: "Prepare for History Quiz", completed: false },
-  ]);
+  const [goals, setGoals] = useState([]);
   const [newGoal, setNewGoal] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [roomCode, setRoomCode] = useState("");
 
-  const addGoal = () => {
+  // ✅ Fetch todos from backend
+  useEffect(() => {
+    const fetchTodos = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        if (!token) return;
+        const res = await axios.get("http://localhost:3000/landing/todo", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setGoals(
+          res.data.map((t) => ({
+            id: t._id,
+            text: t.task,
+            completed: t.completed,
+          }))
+        );
+      } catch (err) {
+        console.error("Error fetching todos:", err.response?.data || err.message);
+      }
+    };
+    fetchTodos();
+  }, []);
+
+  // ✅ Add new goal
+  const addGoal = async () => {
     if (newGoal.trim() === "") return;
-    setGoals([...goals, { id: Date.now(), text: newGoal, completed: false }]);
-    setNewGoal("");
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await axios.post(
+        "http://localhost:3000/landing/todo",
+        { task: newGoal },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setGoals([
+        ...goals,
+        { id: res.data.todo._id, text: res.data.todo.task, completed: false },
+      ]);
+      setNewGoal("");
+    } catch (err) {
+      console.error("Error adding goal:", err.response?.data || err.message);
+    }
   };
 
-  const toggleGoal = (id) => {
-    setGoals(
-      goals.map((goal) =>
-        goal.id === id ? { ...goal, completed: !goal.completed } : goal
-      )
-    );
+  // ✅ Toggle goal completion
+  const toggleGoal = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      const res = await axios.put(
+        `http://localhost:3000/landing/todo/${id}`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setGoals(
+        goals.map((goal) =>
+          goal.id === id ? { ...goal, completed: res.data.todo.completed } : goal
+        )
+      );
+    } catch (err) {
+      console.error("Error toggling goal:", err.response?.data || err.message);
+    }
   };
 
-  const deleteGoal = (id) => {
-    setGoals(goals.filter((goal) => goal.id !== id));
+  // ✅ Delete goal
+  const deleteGoal = async (id) => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      await axios.delete(`http://localhost:3000/landing/todo/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setGoals(goals.filter((goal) => goal.id !== id));
+    } catch (err) {
+      console.error("Error deleting goal:", err.response?.data || err.message);
+    }
   };
 
+  // ✅ Logout handler
+  const handleLogout = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (token) {
+        await axios.post(
+          "http://localhost:3000/login/logout",
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+    } catch (err) {
+      console.error("Logout failed:", err.response?.data || err.message);
+    } finally {
+      localStorage.removeItem("accessToken");
+      navigate("/login");
+    }
+  };
+
+  // ✅ Handle join room
   const handleJoinRoom = () => {
     if (roomCode.trim() === "123") {
       navigate("/studwait");
-      return;
     } else {
-      alert("Please enter a room code");
-      return;
+      alert("Please enter a valid room code");
     }
-    navigate(`/room/${roomCode}`);
   };
 
   return (
@@ -59,8 +130,9 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* Search & Join/Create Section */}
+          {/* Search & Join/Create/Logout Section */}
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+            {/* Search Bar */}
             <div className="flex items-center bg-[var(--bg-sec)] border border-[var(--bg-ter)] rounded-[var(--radius)] px-3 py-2 w-full sm:w-72 shadow-sm">
               <Search className="w-4 h-4 text-[var(--txt-dim)] mr-2" />
               <input
@@ -72,6 +144,7 @@ export default function Dashboard() {
               />
             </div>
 
+            {/* Room Code Input */}
             <input
               type="text"
               value={roomCode}
@@ -80,6 +153,7 @@ export default function Dashboard() {
               className="border border-[var(--bg-ter)] rounded-[var(--radius)] px-3 py-2 text-sm bg-[var(--bg-sec)] text-[var(--txt)] placeholder-[var(--txt-dim)] focus:ring-2 focus:ring-[var(--btn)] focus:outline-none w-full sm:w-40"
             />
 
+            {/* Join Room */}
             <button
               onClick={handleJoinRoom}
               className="bg-[var(--btn)] text-white px-4 py-2 rounded-[var(--radius)] hover:bg-[var(--btn-hover)] transition"
@@ -87,12 +161,20 @@ export default function Dashboard() {
               Join Room
             </button>
 
+            {/* Create Room */}
             <button
               onClick={() => navigate("/HostWait")}
               className="bg-[var(--btn)] text-white px-4 py-2 rounded-[var(--radius)] hover:bg-[var(--btn-hover)] transition flex items-center"
             >
-              <icon className="fas fa-plus mr-2"></icon>
-              Create Room
+              <i className="fas fa-plus mr-2"></i> Create Room
+            </button>
+
+            {/* ✅ Logout Button */}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 bg-red-500 text-white px-4 py-2 rounded-[var(--radius)] hover:bg-red-600 transition"
+            >
+              <LogOut className="w-4 h-4" /> Logout
             </button>
           </div>
         </div>
@@ -119,7 +201,7 @@ export default function Dashboard() {
 
         {/* Goals & Events */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Goals Section */}
+          {/* ✅ Goals Section */}
           <div className="lg:col-span-2 bg-[var(--bg-sec)] rounded-[var(--radius)] shadow-sm p-5 hover:shadow-md transition">
             <h2 className="font-semibold mb-4 flex items-center gap-2 text-[var(--txt)]">
               <Target className="w-5 h-5 text-[var(--btn)]" /> Set Goals
@@ -181,18 +263,9 @@ export default function Dashboard() {
             </h2>
             <div className="space-y-3">
               {[
-                {
-                  title: "Math Quiz Championship",
-                  time: "Yesterday 2:00 PM · 45 joined",
-                },
-                {
-                  title: "Science Review Session",
-                  time: "Oct 1, 10:00 AM · 32 joined",
-                },
-                {
-                  title: "History Trivia Night",
-                  time: "Sep 30, 7:00 PM · 28 joined",
-                },
+                { title: "Math Quiz Championship", time: "Yesterday 2:00 PM · 45 joined" },
+                { title: "Science Review Session", time: "Oct 1, 10:00 AM · 32 joined" },
+                { title: "History Trivia Night", time: "Sep 30, 7:00 PM · 28 joined" },
               ].map((event, idx) => (
                 <div
                   key={idx}
@@ -209,23 +282,12 @@ export default function Dashboard() {
         {/* Recent Rooms */}
         <section className="bg-[var(--bg-sec)] shadow-sm rounded-[var(--radius)] p-5 hover:shadow-md transition">
           <h2 className="font-semibold mb-4 text-[var(--txt)] flex items-center gap-2">
-            {/* <icon className="fas fa-door-open text-[var(--btn)] w-5 h-5 mb-2"></icon>{" "} */}
-            <LogOut className="w-5 h-5 text-[var(--btn)] " /> Recent Rooms
+            <i className="fas fa-door-open text-[var(--btn)] w-5 h-5 mb-2"></i> Recent Rooms
           </h2>
           <div className="space-y-3">
             {[
-              {
-                title: "Algebra Basics",
-                host: "Ms. Johnson",
-                participants: 24,
-                status: "active",
-              },
-              {
-                title: "World War 2",
-                host: "Mr. Smith",
-                participants: 18,
-                status: "completed",
-              },
+              { title: "Algebra Basics", host: "Ms. Johnson", participants: 24, status: "active" },
+              { title: "World War 2", host: "Mr. Smith", participants: 18, status: "completed" },
             ].map((room, idx) => (
               <div
                 key={idx}
@@ -239,9 +301,7 @@ export default function Dashboard() {
                 </div>
                 <span
                   className={`text-sm font-medium ${
-                    room.status === "active"
-                      ? "text-green-500"
-                      : "text-blue-500"
+                    room.status === "active" ? "text-green-500" : "text-blue-500"
                   }`}
                 >
                   {room.status}
