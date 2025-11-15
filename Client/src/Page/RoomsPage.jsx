@@ -94,7 +94,7 @@ const RoomsPage = () => {
     setFormData({ name: "", category: "", description: "" });
     setShowModal(false);
 
-    navigate("/lobby"); // Lobby 
+    navigate("/create-session");
   };
 
   const handleDeleteRoom = (index) => {
@@ -249,7 +249,7 @@ const RoomsPage = () => {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="bg-[var(--bg-ter)] hover:bg-[var(--bg-sec)] text-white px-4 py-2 rounded-[var(--radius)] transition"
+                  className="bg-[var(--bg-ter)] hover:bg-[var(--bg-primary)] text-[var(--txt-dim)] px-4 py-2 rounded-[var(--radius)] transition"
                 >
                   Cancel
                 </button>

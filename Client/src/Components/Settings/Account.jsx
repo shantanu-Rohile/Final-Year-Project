@@ -13,7 +13,7 @@ export default function Account() {
 
         {/* Account content placeholder */}
         <div 
-          className="rounded-2xl p-12 text-center"
+          className="rounded-2xl p-12 text-center border-8 border-[var(--bg-ter)]"
           style={{ backgroundColor: 'var(--bg-sec)' }}
         >
           <User 

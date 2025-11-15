@@ -13,7 +13,7 @@ export default function AboutUs() {
     <div className="bg-[--bg-primary] text-[--txt] min-h-screen py-8 px-5 ml-[70px] text-justify">
       {/* Our Open Source Work */}
       <motion.section
-        className="max-w-5xl mx-auto mb-16"
+        className="max-w-5xl mx-auto mb-12"
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.7 }}
@@ -119,7 +119,7 @@ export default function AboutUs() {
 
       {/* Final Section */}
       <motion.section
-        className="max-w-5xl mx-auto text-center mt-20 pb-10"
+        className="max-w-5xl mx-auto text-center mt-20"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}

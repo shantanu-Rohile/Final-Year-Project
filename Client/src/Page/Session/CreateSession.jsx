@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function HostDashboard() {
+export default function CreateSession() {
   const [questions, setQuestions] = useState([]);
   const [questionData, setQuestionData] = useState({
     title: "",

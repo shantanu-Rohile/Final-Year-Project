@@ -23,9 +23,9 @@ function Sidebar() {
 
   // Map URL paths to sidebar IDs
   const pathToId = {
-    "/landingpage": "home",
+    "/dashboard": "home",
     "/session": "session",
-    "/Page": "about",
+    "/aboutus": "about",
     "/stats": "stats",
     "/notes": "notes",
     "/attendance": "attendance",
@@ -104,7 +104,7 @@ function Sidebar() {
             IconComponent={Home}
             label="Home"
             ref={(el) => (linkRefs.current["home"] = el)}
-            onClick={() => navigate("/landingpage")}
+            onClick={() => navigate("/dashboard")}
           />
           <SidebarLink
             id="session"
@@ -140,7 +140,7 @@ function Sidebar() {
             IconComponent={BadgeInfo}
             label="About"
             ref={(el) => (linkRefs.current["about"] = el)}
-            onClick={() => navigate("/Page")}
+            onClick={() => navigate("/aboutus")}
           />
         </div>
       </div>
