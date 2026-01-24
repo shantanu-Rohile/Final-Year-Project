@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Palette, User } from "lucide-react";
+import { Palette, User, LogOut } from "lucide-react";
 import Themes from "../Components/Settings/Themes";
 import Account from "../Components/Settings/Account";
 
@@ -22,6 +22,11 @@ const Settings = () => {
   // Handle tab change
   const handleTabChange = (tabId) => {
     setSearchParams({ tab: tabId });
+  };
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
   };
 
   return (
@@ -65,7 +70,10 @@ const Settings = () => {
         }}
       >
         {/* Close button on mobile */}
-        <h1 className="px-4 text-2xl font-bold pb-2" style={{ color: "var(--txt)" }}>
+        <h1
+          className="px-4 text-2xl font-bold pb-2"
+          style={{ color: "var(--txt)" }}
+        >
           Settings
         </h1>
         <hr className="border-[var(--txt-disabled)] opacity-50 pb-4" />
@@ -117,6 +125,17 @@ const Settings = () => {
             );
           })}
         </nav>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-md
+                       bg-[var(--bg-ter)] text-[var(--txt)]
+                       hover:bg-[var(--bg-sec)] transition"
+        >
+          <LogOut size={18} />
+          <span className="hidden sm:inline">Logout</span>
+        </motion.button>
       </div>
 
       {/* ✅ Main Content Area */}
