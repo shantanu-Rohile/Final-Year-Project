@@ -1,32 +1,62 @@
-import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+import express from "express";
 import cors from "cors";
-import signinRoute from "./Routes/SigninRoutes.js";
-import loginRoutes from "./Routes/LoginRoutes.js";
-import todoRoutes from "./Routes/todoRoutes.js";
+import connectDB from "./config/database.js";
+// import { startCronJobs } from './utils/cronJobs.js';
+// Import routes
+import authRoutes from "./routes/authRoute.js";
+import questionRoutes from "./routes/questionRoute.js";
+import roomRoutes from "./routes/roomRoute.js";
+import savedRoomRoutes from "./routes/savedRoom.js";
+import quizRoutes from "./routes/quizRoute.js";
 
 dotenv.config();
+
 const app = express();
+const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// Environment vars
-const PORT = process.env.PORT || 3000;
+// Connect to MongoDB
+connectDB();
 
 // Routes
-app.use("/signin", signinRoute); // for user registration
-app.use("/login", loginRoutes);  // for user login
-app.use("/landing/todo", todoRoutes);  // for user login
-// Database connection
-mongoose
-  .connect(process.env.mongoURL)
-  .then(() => {
-    console.log("✅ Database Connected");
-    app.listen(PORT, () => console.log(`🚀 App listening on PORT : ${PORT}`));
-  })
-  .catch((err) => {
-    console.log(`❌ Database Connection Error: ${err}`);
+app.use("/api/auth", authRoutes);
+app.use("/api/questions", questionRoutes);
+app.use("/api/rooms", roomRoutes);
+app.use("/api/saved-rooms", savedRoomRoutes);
+app.use("/api/quiz", quizRoutes);
+
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Server is running",
+    timestamp: new Date().toISOString(),
   });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    error: "Route not found",
+  });
+});
+
+// Error handler
+app.use((err, req, res, next) => {
+  console.error("❌ Server error:", err);
+  res.status(500).json({
+    success: false,
+    error: "Internal server error",
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+  // Start cron jobs
+  // startCronJobs();
+});
