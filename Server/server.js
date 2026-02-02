@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
+import path from "path";
 import connectDB from "./config/database.js";
 // import { startCronJobs } from './utils/cronJobs.js';
 // Import routes
@@ -13,6 +14,8 @@ import quizRoutes from "./routes/quizRoute.js";
 dotenv.config();
 
 const app = express();
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
 const PORT = process.env.PORT || 5000;
 
 // Middleware

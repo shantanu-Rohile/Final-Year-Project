@@ -1,5 +1,6 @@
 import axios from 'axios';
 
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Create axios instance
@@ -39,7 +40,26 @@ api.interceptors.response.use(
 
 // Auth APIs
 export const authAPI = {
-  signup: (data) =>  api.post('/api/auth/signup', data),
-  login: (data) => api.post('/api/auth/login', data),
-  getMe: () => api.get('/api/auth/me')
+  signup: (data) => api.post('/auth/signup', data),
+  login: (data) => api.post('/auth/login', data),
+  getMe: () => api.get('/auth/me'),
+
+  // ✅ Update with FormData support
+  update: (formData) => {
+    const data = new FormData();
+    data.append("username", formData.username);
+    data.append("email", formData.email);
+    data.append("password", formData.password);
+    if (formData.profilePicture) {
+      data.append("profilePicture", formData.profilePicture); // file object
+    }
+
+    return api.put("/auth/update", data, {
+      headers: {
+        "Content-Type": "multipart/form-data"
+      }
+    });
+  },
+  // new helper for removing profile picture
+  removePicture:()=>api.put("/auth/remove-picture")
 };

@@ -44,7 +44,6 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session" element={<Session />} />
             <Route path="/aboutus" element={<AboutUs />} />
-            {/* <Route path="/create-session" element={<CreateSession />} /> */}
             <Route path="/settings" element={<Settings />} />
           </Route>
 

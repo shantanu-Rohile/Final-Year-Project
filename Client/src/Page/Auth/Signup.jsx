@@ -74,7 +74,7 @@ const Signup = () => {
             Create Account
           </h1>
           <p style={{ color: 'var(--txt-dim)' }}>
-            Join Quiz Generator today
+            Join Learning Journey today
           </p>
         </div>
 

@@ -21,7 +21,11 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await authAPI.getMe();
-          setUser(response.data.user);
+          setUser(prev => ({
+  ...prev,
+  ...response.data.user
+}));
+
         } catch (error) {
           console.error('Failed to load user:', error);
           logout();
@@ -82,6 +86,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = {
     user,
+    setUser,
     token,
     loading,
     login,

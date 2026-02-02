@@ -2,6 +2,13 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
+  // ✅ Profile picture field
+  profilePicture: {
+    type: String,
+    default: ""
+  },
+
+  
   username: {
     type: String,
     required: [true, "Username is required"],

@@ -60,7 +60,7 @@ const Login = () => {
             Welcome Back
           </h1>
           <p style={{ color: 'var(--txt-dim)' }}>
-            Sign in to continue to Quiz Generator
+            Sign in to continue to Learning Journey
           </p>
         </div>
 
