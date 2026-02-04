@@ -1,5 +1,8 @@
 import User from '../Models/User.js';
 import { generateToken } from '../middleware/auth.js';
+import fs from "fs";
+import path from "path";
+
 
 // @desc    Register user
 // @route   POST /api/auth/signup
@@ -197,6 +200,15 @@ export const removePicture = async (req, res) => {
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+     // ⭐ Delete file if exists
+    if (user.profilePicture) {
+      const filePath = path.join(process.cwd(), user.profilePicture);
+
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+      }
     }
 
     // Clear profile picture field
