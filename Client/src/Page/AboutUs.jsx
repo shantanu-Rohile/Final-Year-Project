@@ -134,7 +134,8 @@ export default function AboutUs() {
 
         <div className="flex flex-wrap gap-4 justify-center">
           <a
-            href="https://github.com/your-repo-link/blob/main/README.md"
+            href="https://github.com/shantanu-Rohile/Final-Year-Project"
+
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[--btn] hover:bg-[--btn-hover] px-4 py-2 rounded-[--radius] shadow-md transition"
@@ -143,7 +144,8 @@ export default function AboutUs() {
           </a>
 
           <a
-            href="https://github.com/your-repo-link/blob/main/CONTRIBUTING.md"
+            href="https://github.com/shantanu-Rohile/Final-Year-Project/issues" 
+
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[--btn] hover:bg-[--btn-hover] px-4 py-2 rounded-[--radius] shadow-md transition"
@@ -152,7 +154,7 @@ export default function AboutUs() {
           </a>
 
           <a
-            href="/contact"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=eduquest@gmail.com&su=Regarding EduQuest&body=Hello EduQuest Team,"
             className="bg-[--btn] hover:bg-[--btn-hover] px-4 py-2 rounded-[--radius] shadow-md transition"
           >
             📩 Contact Us
