@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Palette, User, LogOut } from "lucide-react";
 import Themes from "../Components/Settings/Themes";
 import Account from "../Components/Settings/Account";
+import { X, Menu } from "lucide-react";
 
 const Settings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -48,93 +49,92 @@ const Settings = () => {
           Settings
         </h1>
         <button
-          onClick={() => setIsSidebarOpen((prev) => !prev)}
+          onClick={() => setIsSidebarOpen(true)}
           className="p-2 rounded-lg transition-colors duration-200"
           style={{
             backgroundColor: "var(--bg-ter)",
             color: "var(--txt)",
           }}
-          aria-label="Toggle menu"
+          aria-label="Close menu"
         >
-          <i className="ri-menu-line text-xl" />
+          <Menu size={22} />
         </button>
       </div>
 
-     <div
-  className={`fixed md:static top-0 left-0 h-full w-60 p-6 border-r z-20
-    ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
-    flex flex-col justify-between`}
-
+      <div
+        className={`fixed md:static top-0 left-0 h-full w-60 p-6 border-r z-20
+         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0
+         flex flex-col justify-between`}
         style={{
           backgroundColor: "var(--bg-primary)",
           borderColor: "var(--bg-ter)",
         }}
       >
         {/* Close button on mobile */}
-       <div>
-  <h1
-    className="px-4 text-2xl font-bold pb-2"
-    style={{ color: "var(--txt)" }}
-  >
-    Settings
-  </h1>
+        <div>
+          <h1
+            className="px-4 text-2xl font-bold pb-2"
+            style={{ color: "var(--txt)" }}
+          >
+            Settings
+          </h1>
 
-  <hr className="border-[var(--txt-disabled)] opacity-50 pb-4" />
+          <hr className="border-[var(--txt-disabled)] opacity-50 pb-4" />
 
-  <div className="flex items-center justify-between mb-6 md:hidden">
-    <button
-      onClick={() => setIsSidebarOpen(false)}
-      className="p-2 rounded-lg transition-colors duration-200"
-      style={{
-        backgroundColor: "var(--bg-ter)",
-        color: "var(--txt)",
-      }}
-      aria-label="Close menu"
-    >
-      <i className="ri-close-line text-xl" />
-    </button>
-  </div>
+          <div className="flex items-center justify-between mb-6 md:hidden">
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="p-2 rounded-lg transition-colors duration-200"
+              style={{
+                backgroundColor: "var(--bg-ter)",
+                color: "var(--txt)",
+              }}
+              aria-label="Close menu"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-  <nav className="space-y-2">
-    {menuItems.map((item) => {
-      const Icon = item.icon;
-      const isActive = currentTab === item.id;
+          <nav className="space-y-2">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = currentTab === item.id;
 
-      return (
+              return (
+                <motion.button
+                  key={item.id}
+                  onClick={() => {
+                    handleTabChange(item.id);
+                    setIsSidebarOpen(false);
+                  }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    isActive ? "font-semibold" : ""
+                  }`}
+                  style={{
+                    backgroundColor: isActive ? "var(--btn)" : "transparent",
+                    color: isActive ? "#fff" : "var(--txt)",
+                  }}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="text-base md:text-lg">{item.label}</span>
+                </motion.button>
+              );
+            })}
+          </nav>
+        </div>
+
         <motion.button
-          key={item.id}
-          onClick={() => {
-            handleTabChange(item.id);
-            setIsSidebarOpen(false);
-          }}
-          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-            isActive ? "font-semibold" : ""
-          }`}
-          style={{
-            backgroundColor: isActive ? "var(--btn)" : "transparent",
-            color: isActive ? "#fff" : "var(--txt)",
-          }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleLogout}
+          className="flex items-center gap-2 px-4 py-2 rounded-md
+               bg-[var(--bg-ter)] text-[var(--txt)] 
+               border border-1 border-[var(--txt-disabled)] hover:border-[var(--txt)]
+               hover:bg-[var(--bg-sec)] transition"
         >
-          <Icon className="w-5 h-5" />
-          <span className="text-base md:text-lg">{item.label}</span>
+          <LogOut size={18} />
+          <span className="hidden sm:inline">Logout</span>
         </motion.button>
-      );
-    })}
-  </nav>
-</div>
-
-<motion.button
-  whileHover={{ scale: 1.05 }}
-  whileTap={{ scale: 0.95 }}
-  onClick={handleLogout}
-  className="flex items-center gap-2 px-4 py-2 rounded-md
-               bg-red-500 text-white
-             hover:bg-red-600 transition"
->
-  <LogOut size={18} />
-  <span className="hidden sm:inline">Logout</span>
-</motion.button>
-
       </div>
 
       {/* ✅ Main Content Area */}
