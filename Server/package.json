@@ -12,7 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google/genai": "^1.38.0",
+    "@google/genai": "^1.51.0",
     "axios": "^1.13.1",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -21,7 +21,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^8.19.2",
     "multer": "^2.0.2",
-    "nanoid": "^5.1.6",
+    "nanoid": "^5.1.11",
     "node-cron": "^4.2.1",
     "nodemon": "^3.1.10",
     "socket.io": "^4.8.1"

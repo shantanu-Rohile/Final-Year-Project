@@ -9,13 +9,18 @@ export default function GitHubStats({ repoUrl }) {
     const fetchStats = async () => {
       try {
         // Extract "owner/repo" from repoUrl
-        const repoPath = repoUrl.replace("https://github.com/", "").replace(".git", "");
+        const repoPath = repoUrl
+          .replace("https://github.com/", "")
+          .replace(".git", "");
 
-        const response = await fetch(`https://api.github.com/repos/${repoPath}`, {
-          headers: {
-            Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`, // Use your PAT from .env.local
+        const response = await fetch(
+          `https://api.github.com/repos/${repoPath}`,
+          {
+            headers: {
+              Authorization: `token ${import.meta.env.VITE_GITHUB_TOKEN}`, // Use your PAT from .env.local
+            },
           },
-        });
+        );
 
         if (!response.ok) throw new Error("GitHub API error");
 
@@ -33,27 +38,31 @@ export default function GitHubStats({ repoUrl }) {
   }, [repoUrl]);
 
   return (
-    <div className="bg-[--bg-sec] rounded-[--radius] shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between gap-6 hover:bg-[--bg-ter] transition">
+    <div className="bg-[var(--bg-ter)] rounded-[var(--radius)] shadow-lg p-6 flex flex-col sm:flex-row items-center justify-between gap-6 hover:bg-[var(--bg-sec)] transition">
       {/* Left: Repo Info */}
       <div className="flex items-center gap-3">
-        <FaGithub className="text-3xl" />
+        <FaGithub className="text-3xl text-[var(--txt)]" />
+
         <a
           href={repoUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-xl font-semibold hover:underline"
+          className="text-xl font-semibold text-[var(--txt)] hover:underline"
         >
           Open on GitHub
         </a>
       </div>
 
       {/* Right: Stats */}
-      <div className="flex gap-6 text-lg">
+      <div className="flex gap-6 text-lg text-[var(--txt)]">
         <div className="flex items-center gap-2 hover:scale-110 transition-transform">
-          <FaCodeBranch /> <span>{stats.forks} Forks</span>
+          <FaCodeBranch />
+          <span>{stats.forks} Forks</span>
         </div>
+
         <div className="flex items-center gap-2 hover:scale-110 transition-transform">
-          <FaStar /> <span>{stats.stars} Stars</span>
+          <FaStar />
+          <span>{stats.stars} Stars</span>
         </div>
       </div>
     </div>

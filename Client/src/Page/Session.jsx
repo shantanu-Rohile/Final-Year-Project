@@ -134,7 +134,7 @@ const Session = () => {
 
   /* ================== UI ================== */
   return (
-    <div className="min-h-screen bg-[var(--bg-primary)] px-4 sm:px-6 md:px-8 py-8 text-[var(--txt)] ml-[70px] ">
+    <div className="min-h-screen bg-[var(--bg-primary)] px-4 sm:px-6 md:px-8 py-8 text-[var(--txt)]   ">
       {/* Header */}
       <div className="max-w-7xl mx-auto mb-10">
         <div className="flex items-center justify-between mb-6">

@@ -42,3 +42,50 @@ export function cleanGeminiResponse(rawResponse) {
     throw new Error(`Failed to parse Gemini response: ${error.message}`);
   }
 }
+
+
+export function cleanAsyncGeminiResponse(rawResponse) {
+  try {
+    // Remove any markdown code blocks
+    let cleaned = rawResponse.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
+    // Remove any leading text before the JSON
+    const jsonStart = cleaned.indexOf('[');
+    const jsonEnd = cleaned.lastIndexOf(']') + 1;
+    
+    if (jsonStart === -1 || jsonEnd === 0) {
+      throw new Error('No JSON array found in response');
+    }
+    
+    cleaned = cleaned.substring(jsonStart, jsonEnd);
+    
+    // Parse the JSON
+    const questions = JSON.parse(cleaned);
+    
+    // Validate the structure
+    if (!Array.isArray(questions)) {
+      throw new Error('Response is not an array');
+    }
+    
+    // Validate each question has the NEW required fields
+    const validatedQuestions = questions.map((q, index) => {
+      // Check for the new schema properties!
+      if (!q.questionText || q.correctOptionIndex === undefined) {
+        throw new Error(`Question at index ${index} is missing required fields (questionText or correctOptionIndex)`);
+      }
+      
+      // Ensure options exist and there are exactly 4
+      if (!q.options || !Array.isArray(q.options) || q.options.length !== 4) {
+        throw new Error(`Question at index ${index} must have exactly 4 options`);
+      }
+      
+      return q;
+    });
+    
+    return validatedQuestions;
+    
+  } catch (error) {
+    console.error('Error cleaning async Gemini response:', error);
+    throw new Error(`Failed to parse Gemini response: ${error.message}`);
+  }
+}
