@@ -34,7 +34,7 @@ const Settings = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col md:flex-row h-screen ml-[70px]"
+      className="min-h-screen flex flex-col md:flex-row h-screen"
       style={{ backgroundColor: "var(--bg-sec)" }}
     >
       {/* ✅ Mobile Header */}
