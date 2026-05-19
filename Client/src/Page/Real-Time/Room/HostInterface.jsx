@@ -17,10 +17,25 @@ import {
   CheckCircle2,
   Loader2,
   ChevronLeft,
+  GripVertical,
   ChevronRight,
 } from "lucide-react";
 import { API_URL, SOCKET_URL } from "../../../config/backend.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 /* ─────────────────────────────────────────────────────────────
    Tiny shared primitives — keeps JSX below clean
@@ -106,6 +121,111 @@ const SectionTitle = ({ icon: Icon, children, count }) => (
   </div>
 );
 
+function SortableQuestionCard({ q, idx, onRemove }) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: q.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 50 : "auto",
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="
+        hi-fade bg-[var(--bg-sec)]
+        border border-[rgba(var(--shadow-rgb),.1)] rounded-xl p-4
+        hover:border-[rgba(var(--shadow-rgb),.25)] transition-colors duration-150
+      "
+    >
+      {/* Card header: drag handle + question number + remove button */}
+      <div className="flex items-center gap-2 mb-1.5">
+        {/* Drag handle — only this area triggers drag, not the whole card */}
+        <button
+          {...attributes}
+          {...listeners}
+          aria-label="Drag to reorder"
+          className="
+            flex items-center justify-center w-6 h-6 rounded-md flex-shrink-0
+            text-[var(--txt-disabled)] hover:text-purple-400
+            hover:bg-[rgba(var(--shadow-rgb),.15)]
+            cursor-grab active:cursor-grabbing transition-colors
+          "
+        >
+          <GripVertical size={14} />
+        </button>
+
+        <p className="text-[10px] font-bold tracking-widest uppercase text-purple-400 flex-1">
+          Question {String(idx + 1).padStart(2, "0")}
+        </p>
+
+        {/* Remove button */}
+        <button
+          onClick={() => onRemove(q.id)}
+          aria-label="Remove question"
+          className="
+            flex items-center justify-center w-6 h-6 rounded-md flex-shrink-0
+            bg-red-500/10 text-red-400 border border-red-500/15
+            hover:bg-red-500/25 transition-colors
+          "
+        >
+          <Trash2 size={12} />
+        </button>
+      </div>
+
+      {/* Question text */}
+      <p className="text-sm font-semibold text-[var(--txt)] leading-snug mb-3 pl-8">
+        {q.questionText}
+      </p>
+
+      {/* Options grid */}
+      <div className="grid grid-cols-2 gap-1.5 mb-3 pl-8">
+        {q.options.map((opt, i) => (
+          <div
+            key={i}
+            className={`
+              text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5
+              ${
+                q.correctOptionIndex === i
+                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  : "bg-[var(--bg-ter)] text-[var(--txt-dim)]"
+              }
+            `}
+          >
+            <span className="font-bold opacity-60">{OPTION_LETTERS[i]}.</span>
+            <span className="truncate">{opt.text}</span>
+            {q.correctOptionIndex === i && (
+              <CheckCircle2 size={11} className="ml-auto flex-shrink-0" />
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Badges */}
+      <div className="flex gap-2 pl-8">
+        <Badge>
+          <Trophy size={9} />
+          {q.marks} pt
+        </Badge>
+        <Badge>
+          <Clock size={9} />
+          {q.timeLimit}s
+        </Badge>
+      </div>
+    </div>
+  );
+}
+
 /* ─────────────────────────────────────────────────────────────
    Main Component
 ───────────────────────────────────────────────────────────── */
@@ -125,6 +245,11 @@ function HostInterface() {
   const [correctOptionIndex, setCorrectOptionIndex] = useState(null);
   const [marks, setMarks] = useState(1);
   const [timeLimit, setTimeLimit] = useState(30);
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 6 }, // prevents accidental drags on click
+    }),
+  );
 
   // Question list
   const [questions, setQuestions] = useState([]);
@@ -194,6 +319,7 @@ function HostInterface() {
     if (timeLimit < 5) return alert("Time limit must be at least 5 seconds");
 
     const payload = {
+      id: crypto.randomUUID(),
       questionText: question,
       options: options.map((text) => ({ text })),
       correctOptionIndex,
@@ -275,10 +401,28 @@ function HostInterface() {
   };
 
   const handleAddAIQuestion = (q) => {
-    const updated = [...questions, q];
+    const stamped = q.id ? q : { ...q, id: crypto.randomUUID() };
+    const updated = [...questions, stamped];
     setQuestions(updated);
     localStorage.setItem(`questionSet_${roomId}`, JSON.stringify(updated));
     setGeneratedQuestions((prev) => prev.filter((x) => x !== q));
+  };
+
+  // Reorder on drag end
+  const handleDragEnd = ({ active, over }) => {
+    if (!over || active.id === over.id) return;
+    const oldIndex = questions.findIndex((q) => q.id === active.id);
+    const newIndex = questions.findIndex((q) => q.id === over.id);
+    const reordered = arrayMove(questions, oldIndex, newIndex);
+    setQuestions(reordered);
+    localStorage.setItem(`questionSet_${roomId}`, JSON.stringify(reordered));
+  };
+
+  // Remove a single question by id
+  const handleRemoveQuestion = (id) => {
+    const updated = questions.filter((q) => q.id !== id);
+    setQuestions(updated);
+    localStorage.setItem(`questionSet_${roomId}`, JSON.stringify(updated));
   };
 
   const handleRemoveAIQuestion = (q) =>
@@ -310,8 +454,7 @@ function HostInterface() {
               <div
                 className="
                   w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
-                  bg-[rgba(var(--shadow-rgb),.2)] border border-[rgba(var(--shadow-rgb),.3)]
-                "
+                  bg-[rgba(var(--shadow-rgb),.2)] border border-[rgba(var(--shadow-rgb),.3)]"
               >
                 <Sparkles size={16} className="text-[var(--btn)]" />
               </div>
@@ -804,8 +947,8 @@ function HostInterface() {
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <div
                     className="
-                      w-16 h-16 rounded-2xl flex items-center justify-center mb-4
-                      bg-[rgba(var(--shadow-rgb),.12)] border border-[rgba(var(--shadow-rgb),.15)]"
+          w-16 h-16 rounded-2xl flex items-center justify-center mb-4
+          bg-[rgba(var(--shadow-rgb),.12)] border border-[rgba(var(--shadow-rgb),.15)]"
                   >
                     <ListChecks
                       size={28}
@@ -820,65 +963,27 @@ function HostInterface() {
                   </p>
                 </div>
               ) : (
-                <div className="flex flex-col gap-3">
-                  {questions.map((q, idx) => (
-                    <div
-                      key={idx}
-                      className="
-                        hi-fade bg-[var(--bg-sec)]
-                        border border-[rgba(var(--shadow-rgb),.1)] rounded-xl p-4
-                        hover:border-[rgba(var(--shadow-rgb),.25)] transition-colors duration-150"
-                    >
-                      {/* Number + text */}
-                      <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--btn)] mb-1.5">
-                        Question {String(idx + 1).padStart(2, "0")}
-                      </p>
-                      <p className="text-sm font-semibold text-[var(--txt)] leading-snug mb-3">
-                        {q.questionText}
-                      </p>
-
-                      {/* Options grid */}
-                      <div className="grid grid-cols-2 gap-1.5 mb-3">
-                        {q.options.map((opt, i) => (
-                          <div
-                            key={i}
-                            className={`
-                              text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5
-                              ${
-                                q.correctOptionIndex === i
-                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                  : "bg-[var(--bg-ter)] text-[var(--txt-dim)]"
-                              }
-                            `}
-                          >
-                            <span className="font-bold opacity-60">
-                              {OPTION_LETTERS[i]}.
-                            </span>
-                            <span className="truncate">{opt.text}</span>
-                            {q.correctOptionIndex === i && (
-                              <CheckCircle2
-                                size={11}
-                                className="ml-auto flex-shrink-0"
-                              />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Badges */}
-                      <div className="flex gap-2">
-                        <Badge>
-                          <Trophy size={9} />
-                          {q.marks} pt
-                        </Badge>
-                        <Badge>
-                          <Clock size={9} />
-                          {q.timeLimit}s
-                        </Badge>
-                      </div>
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={questions.map((q) => q.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <div className="flex flex-col gap-3">
+                      {questions.map((q, idx) => (
+                        <SortableQuestionCard
+                          key={q.id}
+                          q={q}
+                          idx={idx}
+                          onRemove={handleRemoveQuestion}
+                        />
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </SortableContext>
+                </DndContext>
               )}
             </div>
           </div>
