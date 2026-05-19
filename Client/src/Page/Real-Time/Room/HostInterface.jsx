@@ -1,37 +1,136 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Form } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import {
   Sparkles,
-  X,
   Plus,
   Trash2,
-  ChevronRight,
+  Trophy,
+  Clock,
+  Users,
+  PlayCircle,
+  CloudUpload,
+  ListChecks,
+  CirclePlus,
+  Gamepad2,
+  CheckCircle2,
+  Loader2,
   ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import { API_URL, SOCKET_URL } from "../../../config/backend.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
 
+/* ─────────────────────────────────────────────────────────────
+   Tiny shared primitives — keeps JSX below clean
+───────────────────────────────────────────────────────────── */
+
+/** Styled text input */
+const Input = ({ className = "", ...props }) => (
+  <input
+    className={`
+      w-full bg-[var(--bg-ter)] text-[var(--txt)]
+      border border-[rgba(var(--shadow-rgb),.2)] rounded-[var(--radius)]
+      px-3 py-2 text-sm outline-none
+      focus:border-[rgba(var(--shadow-rgb),.55)]
+      focus:ring-2 focus:ring-[rgba(var(--shadow-rgb),.12)]
+      placeholder:text-[var(--txt-disabled)]
+      transition-all duration-150
+      ${className}
+    `}
+    {...props}
+  />
+);
+
+/** Styled textarea */
+const Textarea = ({ className = "", ...props }) => (
+  <textarea
+    className={`
+      w-full bg-[var(--bg-ter)] text-[var(--txt)]
+      border border-[rgba(var(--shadow-rgb),.2)] rounded-[var(--radius)]
+      px-3 py-2 text-sm outline-none resize-none
+      focus:border-[rgba(var(--shadow-rgb),.55)]
+      focus:ring-2 focus:ring-[rgba(var(--shadow-rgb),.12)]
+      placeholder:text-[var(--txt-disabled)]
+      transition-all duration-150
+      ${className}
+    `}
+    {...props}
+  />
+);
+
+/** Field label with optional required asterisk */
+const FieldLabel = ({ children, required }) => (
+  <label className="block text-[10px] font-semibold tracking-widest uppercase text-[var(--txt-dim)] mb-1.5">
+    {children}
+    {required && <span className="text-red-400 ml-0.5">*</span>}
+  </label>
+);
+
+/** Pill badge for marks / time / tags */
+const Badge = ({ children, className = "" }) => (
+  <span
+    className={`
+      inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full
+      bg-[rgba(var(--shadow-rgb),.15)] border border-[rgba(var(--shadow-rgb),.2)] text-[var(--txt-dim)]
+      ${className}
+    `}
+  >
+    {children}
+  </span>
+);
+
+/** Horizontal rule */
+const Divider = ({ className = "" }) => (
+  <div className={`h-px bg-[rgba(var(--shadow-rgb),.12)] ${className}`} />
+);
+
+/** Panel section heading row with icon and optional count */
+const SectionTitle = ({ icon: Icon, children, count }) => (
+  <div className="flex items-center gap-2 mb-4">
+    <Icon size={15} className="text-[var(--btn)]" />
+    <span className="text-[13px] font-semibold text-[var(--txt)] tracking-wide">
+      {children}
+    </span>
+    {count !== undefined && (
+      <span
+        className="
+          ml-auto text-[10px] text-[var(--btn)]
+          bg-[rgba(var(--shadow-rgb),.18)] border border-[rgba(var(--shadow-rgb),.25)]
+          rounded-full px-2 py-0.5"
+      >
+        {count}
+      </span>
+    )}
+  </div>
+);
+
+/* ─────────────────────────────────────────────────────────────
+   Main Component
+───────────────────────────────────────────────────────────── */
+const OPTION_LETTERS = ["A", "B", "C", "D"];
+
 function HostInterface() {
   const { roomId } = useParams();
   const { user } = useAuth();
-  const [participants, setParticipants] = useState([]);
   const socketRef = useRef(null);
 
-  // ---------- FORM STATE ----------
+  /* ── State ── */
+  const [participants, setParticipants] = useState([]);
+
+  // Question form
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", "", "", ""]);
   const [correctOptionIndex, setCorrectOptionIndex] = useState(null);
   const [marks, setMarks] = useState(1);
   const [timeLimit, setTimeLimit] = useState(30);
 
-  // ---------- QUESTIONS ----------
+  // Question list
   const [questions, setQuestions] = useState([]);
 
-  // ---------- AI SIDEBAR STATE ----------
-  const [showAISidebar, setShowAISidebar] = useState(false);
+  // AI sidebar
+  const [showAISidebar, setShowAISidebar] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [aiFormData, setAiFormData] = useState({
     title: "",
@@ -42,30 +141,20 @@ function HostInterface() {
 
   const difficulties = ["Easy", "Medium", "Hard"];
 
-  // ---------- LOAD FROM LOCAL STORAGE ----------
+  /* ── Persist to / restore from localStorage ── */
   useEffect(() => {
-    const storedQuestions = localStorage.getItem(`questionSet_${roomId}`);
-    if (storedQuestions) {
-      setQuestions(JSON.parse(storedQuestions));
-    }
-
-    const storedAIQuestions = localStorage.getItem(`aiQuestions_${roomId}`);
-    if (storedAIQuestions) {
-      setGeneratedQuestions(JSON.parse(storedAIQuestions));
-    }
-
-    const storedAIForm = localStorage.getItem(`aiForm_${roomId}`);
-    if (storedAIForm) {
-      setAiFormData(JSON.parse(storedAIForm));
-    }
+    const sq = localStorage.getItem(`questionSet_${roomId}`);
+    if (sq) setQuestions(JSON.parse(sq));
+    const aq = localStorage.getItem(`aiQuestions_${roomId}`);
+    if (aq) setGeneratedQuestions(JSON.parse(aq));
+    const af = localStorage.getItem(`aiForm_${roomId}`);
+    if (af) setAiFormData(JSON.parse(af));
   }, [roomId]);
 
-  // Save AI form data to localStorage
   useEffect(() => {
     localStorage.setItem(`aiForm_${roomId}`, JSON.stringify(aiFormData));
   }, [aiFormData, roomId]);
 
-  // Save generated questions to localStorage
   useEffect(() => {
     localStorage.setItem(
       `aiQuestions_${roomId}`,
@@ -73,47 +162,47 @@ function HostInterface() {
     );
   }, [generatedQuestions, roomId]);
 
-  // ---------- OPTION CHANGE ----------
+  /* ── Socket ── */
+  useEffect(() => {
+    if (!roomId || !user?.id) return;
+    socketRef.current = io(SOCKET_URL, {
+      auth: { token: localStorage.getItem("token") },
+    });
+    socketRef.current.emit("Join-Room", {
+      roomId,
+      username: user?.username || "Host",
+    });
+    socketRef.current.on("participants-updated", (list) =>
+      setParticipants(list || []),
+    );
+    return () => socketRef.current?.disconnect();
+  }, [roomId, user?.id, user?.username]);
+
+  /* ── Handlers ── */
   const handleOption = (index, value) => {
-    const newOptions = [...options];
-    newOptions[index] = value;
-    setOptions(newOptions);
+    const next = [...options];
+    next[index] = value;
+    setOptions(next);
   };
 
-  // ---------- ADD SINGLE QUESTION ----------
   const handleOnSubmit = (e) => {
     e.preventDefault();
+    if (correctOptionIndex === null)
+      return alert("Please select the correct option");
+    if (options.some((o) => o.trim() === ""))
+      return alert("All options are required");
+    if (timeLimit < 5) return alert("Time limit must be at least 5 seconds");
 
-    if (correctOptionIndex === null) {
-      alert("Please select correct option");
-      return;
-    }
-
-    if (options.some((opt) => opt.trim() === "")) {
-      alert("All options are required");
-      return;
-    }
-
-    if (timeLimit < 5) {
-      alert("Time limit must be at least 5 seconds");
-      return;
-    }
-
-    const questionPayload = {
+    const payload = {
       questionText: question,
-      options: options.map((opt) => ({ text: opt })),
+      options: options.map((text) => ({ text })),
       correctOptionIndex,
       marks,
       timeLimit,
     };
-
-    const updatedQuestions = [...questions, questionPayload];
-    setQuestions(updatedQuestions);
-
-    localStorage.setItem(
-      `questionSet_${roomId}`,
-      JSON.stringify(updatedQuestions),
-    );
+    const updated = [...questions, payload];
+    setQuestions(updated);
+    localStorage.setItem(`questionSet_${roomId}`, JSON.stringify(updated));
 
     // Reset form
     setQuestion("");
@@ -123,28 +212,19 @@ function HostInterface() {
     setTimeLimit(30);
   };
 
-  // ---------- SUBMIT ALL QUESTIONS ----------
   const handleOnSubmitQuestion = async () => {
+    if (questions.length === 0) return alert("Add questions before submitting");
     try {
-      if (questions.length === 0) {
-        alert("Add questions before submitting");
-        return;
-      }
-
       await axios.post(
         `${API_URL}/api/real-rooms/${roomId}/questions`,
         { questions },
         {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },
       );
-
       localStorage.removeItem(`questionSet_${roomId}`);
       localStorage.removeItem(`aiQuestions_${roomId}`);
       localStorage.removeItem(`aiForm_${roomId}`);
-
       alert("Questions submitted successfully");
     } catch (err) {
       console.error(err);
@@ -152,444 +232,128 @@ function HostInterface() {
     }
   };
 
-  // ---------- AI DIFFICULTY TOGGLE ----------
-  const handleDifficultyToggle = (level) => {
+  const handleDifficultyToggle = (level) =>
     setAiFormData((prev) => ({
       ...prev,
       difficulty: prev.difficulty.includes(level)
         ? prev.difficulty.filter((d) => d !== level)
         : [...prev.difficulty, level],
     }));
-  };
 
-  // ---------- AI GENERATE QUESTIONS ----------
   const handleAIGenerate = async (e) => {
     e.preventDefault();
-
-    if (!aiFormData.title || aiFormData.difficulty.length === 0) {
-      alert("Please enter a title and select at least one difficulty level");
-      return;
-    }
-
+    if (!aiFormData.title || aiFormData.difficulty.length === 0)
+      return alert(
+        "Please enter a title and select at least one difficulty level",
+      );
     setIsGenerating(true);
-
     try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
+      const res = await axios.post(
         `${API_URL}/api/questions/asyncgenerate`,
         aiFormData,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         },
       );
-
-      if (response.data.success) {
-        // Add default marks and timeLimit if not provided
-        const questionsWithDefaults = response.data.questions.map((q) => ({
-          ...q,
-          marks: q.marks || 1,
-          timeLimit: q.timeLimit || 30,
-        }));
-
-        setGeneratedQuestions(questionsWithDefaults);
-
-        // Reset AI form
-        setAiFormData({
-          title: "",
-          description: "",
-          difficulty: [],
-        });
+      if (res.data.success) {
+        setGeneratedQuestions(
+          res.data.questions.map((q) => ({
+            ...q,
+            marks: q.marks || 1,
+            timeLimit: q.timeLimit || 30,
+          })),
+        );
+        setAiFormData({ title: "", description: "", difficulty: [] });
       } else {
-        alert(response.data.error || "Failed to generate questions");
+        alert(res.data.error || "Failed to generate questions");
       }
-    } catch (error) {
-      console.error("Error generating questions:", error);
-      alert(error.response?.data?.error || "Failed to generate questions");
+    } catch (err) {
+      alert(err.response?.data?.error || "Failed to generate questions");
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // ---------- ADD AI QUESTION TO MAIN LIST ----------
-  const handleAddAIQuestion = (aiQuestion) => {
-    const updatedQuestions = [...questions, aiQuestion];
-    setQuestions(updatedQuestions);
-    localStorage.setItem(
-      `questionSet_${roomId}`,
-      JSON.stringify(updatedQuestions),
-    );
-
-    // Remove from generated questions
-    const updatedGenerated = generatedQuestions.filter((q) => q !== aiQuestion);
-    setGeneratedQuestions(updatedGenerated);
+  const handleAddAIQuestion = (q) => {
+    const updated = [...questions, q];
+    setQuestions(updated);
+    localStorage.setItem(`questionSet_${roomId}`, JSON.stringify(updated));
+    setGeneratedQuestions((prev) => prev.filter((x) => x !== q));
   };
 
-  // ---------- REMOVE AI QUESTION ----------
-  const handleRemoveAIQuestion = (aiQuestion) => {
-    const updatedGenerated = generatedQuestions.filter((q) => q !== aiQuestion);
-    setGeneratedQuestions(updatedGenerated);
-  };
+  const handleRemoveAIQuestion = (q) =>
+    setGeneratedQuestions((prev) => prev.filter((x) => x !== q));
 
-  // Socket: join room, keep participant list updated, and start contest
-  useEffect(() => {
-    if (!roomId || !user?.id) return;
-
-    socketRef.current = io(SOCKET_URL, {
-      auth: { token: localStorage.getItem("token") },
-    });
-
-    socketRef.current.emit("Join-Room", {
-      roomId,
-      username: user?.username || "Host",
-    });
-
-    socketRef.current.on("participants-updated", (list) => {
-      setParticipants(list || []);
-    });
-
-    return () => socketRef.current?.disconnect();
-  }, [roomId, user?.id, user?.username]);
-
-  const handleStartContest = () => {
+  const handleStartContest = () =>
     socketRef.current?.emit("start-contest", { roomId });
-  };
 
-  // ---------- UI ----------
   return (
-    <div
-      className="min-h-screen px-4 py-8"
-      style={{ backgroundColor: "var(--bg-primary)", color: "var(--txt)" }}
-    >
-      {/* Toggle AI Sidebar Button - Top Right */}
-      <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={() => setShowAISidebar(!showAISidebar)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all shadow-lg"
-          style={{
-            backgroundColor: showAISidebar ? "var(--btn-hover)" : "var(--btn)",
-            color: "white",
-          }}
+    <>
+      <div
+        className="flex min-h-screen"
+        style={{ background: "var(--bg-primary)", color: "var(--txt)" }}
+      >
+        {/* Sidebar  */}
+        <aside
+          className={`
+            hi-scroll flex flex-col flex-shrink-0 overflow-hidden
+            border-r border-[rgba(var(--shadow-rgb),.15)]
+            transition-all duration-300
+            ${showAISidebar ? "w-80" : "w-0"}
+          `}
+          style={{ background: "var(--bg-sec)" }}
         >
-          <Sparkles size={18} />
-          <span className="hidden sm:inline">AI Assistant</span>
-          {showAISidebar ? (
-            <ChevronRight size={18} />
-          ) : (
-            <ChevronLeft size={18} />
-          )}
-        </button>
-      </div>
-
-      {/* Main Layout */}
-      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto pt-16">
-        {/* MAIN CONTENT */}
-        <div
-          className={`flex-1 transition-all duration-300 ${showAISidebar ? "lg:mr-96" : ""}`}
-        >
-          <div
-            className="rounded-lg border p-6"
-            style={{
-              backgroundColor: "var(--bg-sec)",
-              borderColor: "rgba(var(--shadow-rgb),0.2)",
-            }}
-          >
-            <h1 className="text-center mb-3 text-2xl font-bold">
-              Room ID: {roomId}
-            </h1>
-            <h2
-              className="text-center mb-4 text-lg"
-              style={{ color: "var(--txt-dim)" }}
-            >
-              Host Panel
-            </h2>
-
-            {/* ---------- ADD QUESTION FORM ---------- */}
-            <Form onSubmit={handleOnSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Control
-                  placeholder="Enter question"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  required
-                  style={{
-                    backgroundColor: "var(--bg-ter)",
-                    color: "var(--txt)",
-                    borderColor: "rgba(var(--shadow-rgb),0.2)",
-                  }}
-                />
-              </Form.Group>
-
-              {options.map((option, index) => (
-                <div
-                  key={index}
-                  className="d-flex align-items-center gap-2 mb-2"
-                >
-                  <Form.Control
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => handleOption(index, e.target.value)}
-                    required
-                    style={{
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
-                  />
-                  <Form.Check
-                    type="radio"
-                    name="correctOption"
-                    checked={correctOptionIndex === index}
-                    onChange={() => setCorrectOptionIndex(index)}
-                    label="Correct"
-                    style={{ color: "var(--txt)" }}
-                  />
-                </div>
-              ))}
-
-              <div className="d-flex gap-3 mb-3 mt-3">
-                <Form.Group>
-                  <Form.Label>Marks</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    value={marks}
-                    onChange={(e) => setMarks(Number(e.target.value))}
-                    style={{
-                      width: "120px",
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
-                  />
-                </Form.Group>
-
-                <Form.Group>
-                  <Form.Label>Time Limit (seconds)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={5}
-                    max={300}
-                    value={timeLimit}
-                    onChange={(e) => setTimeLimit(Number(e.target.value))}
-                    style={{
-                      width: "150px",
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
-                  />
-                </Form.Group>
-              </div>
-
-              <Button
-                type="submit"
-                style={{
-                  width: "100%",
-                  backgroundColor: "var(--btn)",
-                  border: "none",
-                  padding: "12px",
-                  fontWeight: "600",
-                }}
+          {/* Inner wrapper keeps content from reflowing during animation */}
+          <div className="w-80 flex flex-col flex-1 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-[rgba(var(--shadow-rgb),.15)]">
+              <div
+                className="
+                  w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0
+                  bg-[rgba(var(--shadow-rgb),.2)] border border-[rgba(var(--shadow-rgb),.3)]
+                "
               >
-                Add Question
-              </Button>
-            </Form>
-
-            {/* ---------- DIVIDER ---------- */}
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(var(--shadow-rgb),0.2)",
-                margin: "2rem 0",
-              }}
-            />
-
-            {/* ---------- QUESTION LIST ---------- */}
-            <h4 className="mb-3">Added Questions ({questions.length})</h4>
-
-            {questions.length === 0 && (
-              <p style={{ opacity: 0.7 }}>No questions added yet.</p>
-            )}
-
-            <div className="space-y-3">
-              {questions.map((q, index) => (
-                <div
-                  key={index}
-                  style={{
-                    background: "var(--bg-ter)",
-                    padding: "1.2rem",
-                    borderRadius: "12px",
-                    border: "1px solid rgba(var(--shadow-rgb),0.1)",
-                  }}
-                >
-                  <h5 style={{ color: "var(--txt)" }}>
-                    {index + 1}. {q.questionText}
-                  </h5>
-
-                  <ul className="mt-2">
-                    {q.options.map((opt, i) => (
-                      <li key={i} style={{ color: "var(--txt-dim)" }}>
-                        {opt.text}
-                        {q.correctOptionIndex === i && " ✅"}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="d-flex gap-3 mt-2">
-                    <span
-                      style={{ color: "var(--txt-dim)", fontSize: "0.9rem" }}
-                    >
-                      Marks: {q.marks}
-                    </span>
-                    <span
-                      style={{ color: "var(--txt-dim)", fontSize: "0.9rem" }}
-                    >
-                      Time: ⏱ {q.timeLimit}s
-                    </span>
-                  </div>
-                </div>
-              ))}
+                <Sparkles size={16} className="text-[var(--btn)]" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[var(--txt)]">
+                  AI Generator
+                </p>
+                <p className="text-[10px] text-[var(--txt-dim)]">
+                  Auto-create questions
+                </p>
+              </div>
             </div>
 
-            {/* ---------- SUBMIT ALL ---------- */}
-            <Button
-              onClick={handleOnSubmitQuestion}
-              style={{
-                width: "100%",
-                marginTop: "1.5rem",
-                backgroundColor: "#2ecc71",
-                border: "none",
-                padding: "12px",
-                fontWeight: "600",
-              }}
-            >
-              Submit All Questions
-            </Button>
-
-            {/* ---------- PLAYERS & START ---------- */}
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(var(--shadow-rgb),0.2)",
-                margin: "2rem 0",
-              }}
-            />
-
-            <h4 className="mb-3">Participants ({participants.length})</h4>
-
-            {participants.length === 0 && (
-              <p style={{ opacity: 0.7 }}>Waiting for players to join...</p>
-            )}
-
-            {participants.map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "var(--bg-ter)",
-                  padding: "0.9rem 1.2rem",
-                  borderRadius: "10px",
-                  marginBottom: "0.6rem",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span>{p.username || "Anonymous"}</span>
-                <span style={{ opacity: 0.6, fontSize: "0.85rem" }}>
-                  {String(p.userId).slice(-6)}
-                </span>
-              </div>
-            ))}
-
-            <Button
-              onClick={handleStartContest}
-              style={{
-                width: "100%",
-                marginTop: "1rem",
-                backgroundColor: "#3498db",
-                border: "none",
-                padding: "12px",
-                fontWeight: "600",
-              }}
-              disabled={questions.length === 0}
-            >
-              Start Contest
-            </Button>
-          </div>
-        </div>
-
-        {/* AI SIDEBAR */}
-        {showAISidebar && (
-          <div className="w-full lg:w-96 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:overflow-y-auto lg:pt-20 lg:pb-8 lg:px-4">
-            <div
-              className="rounded-lg border p-5 shadow-2xl"
-              style={{
-                backgroundColor: "var(--bg-sec)",
-                borderColor: "rgba(var(--shadow-rgb),0.3)",
-              }}
-            >
-              {/* AI Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Sparkles size={20} style={{ color: "var(--btn)" }} />
-                  <h3
-                    className="text-lg font-bold"
-                    style={{ color: "var(--txt)" }}
-                  >
-                    AI Question Generator
-                  </h3>
-                </div>
-                <button
-                  onClick={() => setShowAISidebar(false)}
-                  className="lg:hidden p-1 rounded hover:bg-opacity-10"
-                  style={{ color: "var(--txt-dim)" }}
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              {/* AI Form */}
-              <form onSubmit={handleAIGenerate} className="space-y-4">
+            {/* Body */}
+            <div className="flex-1 overflow-y-auto hi-scroll px-4 py-5 flex flex-col gap-5">
+              {/* ── AI Form ── */}
+              <form onSubmit={handleAIGenerate} className="flex flex-col gap-4">
                 {/* Topic */}
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: "var(--txt-dim)" }}
-                  >
-                    Topic / Title <span className="text-red-500">*</span>
-                  </label>
-                  <input
+                  <FieldLabel required>Topic / Title</FieldLabel>
+                  <Input
                     type="text"
+                    placeholder="e.g. JavaScript Array Methods"
                     value={aiFormData.title}
                     onChange={(e) =>
                       setAiFormData({ ...aiFormData, title: e.target.value })
                     }
-                    placeholder="e.g. JavaScript Array Methods"
                     disabled={isGenerating}
-                    className="w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2"
-                    style={{
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: "var(--txt-dim)" }}
-                  >
+                  <FieldLabel>
                     Description{" "}
-                    <span style={{ color: "var(--txt-disabled)" }}>
+                    <span className="text-[var(--txt-disabled)] text-[10px] normal-case tracking-normal font-normal">
                       (optional)
                     </span>
-                  </label>
-                  <textarea
+                  </FieldLabel>
+                  <Textarea
                     rows={3}
+                    placeholder="Extra context, syllabus focus…"
                     value={aiFormData.description}
                     onChange={(e) =>
                       setAiFormData({
@@ -597,25 +361,13 @@ function HostInterface() {
                         description: e.target.value,
                       })
                     }
-                    placeholder="Extra context, syllabus focus, etc."
                     disabled={isGenerating}
-                    className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2"
-                    style={{
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
                   />
                 </div>
 
                 {/* Difficulty */}
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-2"
-                    style={{ color: "var(--txt-dim)" }}
-                  >
-                    Difficulty Level <span className="text-red-500">*</span>
-                  </label>
+                  <FieldLabel required>Difficulty</FieldLabel>
                   <div className="grid grid-cols-3 gap-2">
                     {difficulties.map((level) => {
                       const active = aiFormData.difficulty.includes(level);
@@ -625,16 +377,18 @@ function HostInterface() {
                           type="button"
                           disabled={isGenerating}
                           onClick={() => handleDifficultyToggle(level)}
-                          className="px-3 py-2 rounded-md text-sm font-medium transition border"
-                          style={{
-                            backgroundColor: active
-                              ? "var(--btn)"
-                              : "var(--bg-ter)",
-                            color: active ? "white" : "var(--txt-dim)",
-                            borderColor: active
-                              ? "var(--btn)"
-                              : "rgba(var(--shadow-rgb),0.2)",
-                          }}
+                          className={`
+                            py-2 rounded-[var(--radius)] text-xs font-semibold
+                            border transition-all duration-150
+                            ${
+                              active
+                                ? "bg-[var(--btn)] text-white border-[var(--btn)]"
+                                : `bg-[var(--bg-ter)] text-[var(--txt-dim)]
+                                 border-[rgba(var(--shadow-rgb),.2)]
+                                 hover:border-[rgba(var(--shadow-rgb),.4)]`
+                            }
+                            disabled:opacity-50 disabled:cursor-not-allowed
+                          `}
                         >
                           {level}
                         </button>
@@ -643,109 +397,116 @@ function HostInterface() {
                   </div>
                 </div>
 
-                {/* Generate Button */}
+                {/* Generate */}
                 <button
                   type="submit"
                   disabled={isGenerating}
-                  className="w-full px-4 py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2"
-                  style={{
-                    backgroundColor: "var(--btn)",
-                    color: "white",
-                    opacity: isGenerating ? 0.6 : 1,
-                  }}
+                  className="
+                    w-full py-2.5 rounded-[var(--radius)] text-sm font-semibold
+                    flex items-center justify-center gap-2
+                    bg-[var(--btn)] text-white
+                    hover:bg-[var(--btn-hover)] transition-colors duration-150
+                    disabled:opacity-60 disabled:cursor-not-allowed
+                  "
                 >
                   {isGenerating ? (
                     <>
-                      <span className="animate-spin h-4 w-4 border-2 border-white/40 border-t-white rounded-full" />
-                      Generating...
+                      <Loader2 size={15} className="hi-spin" />
+                      Generating…
                     </>
                   ) : (
                     <>
-                      <Sparkles size={16} />
+                      <Sparkles size={15} />
                       Generate Questions
                     </>
                   )}
                 </button>
               </form>
 
-              {/* Generated Questions */}
+              {/* ── Generated Questions ── */}
               {generatedQuestions.length > 0 && (
                 <>
-                  <div
-                    style={{
-                      height: "1px",
-                      background: "rgba(var(--shadow-rgb),0.2)",
-                      margin: "1.5rem 0",
-                    }}
-                  />
-
-                  <h4
-                    className="text-sm font-semibold mb-3"
-                    style={{ color: "var(--txt)" }}
+                  <Divider />
+                  <SectionTitle
+                    icon={ListChecks}
+                    count={generatedQuestions.length}
                   >
-                    Generated Questions ({generatedQuestions.length})
-                  </h4>
+                    Generated
+                  </SectionTitle>
 
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {generatedQuestions.map((q, index) => (
+                  <div className="flex flex-col gap-3">
+                    {generatedQuestions.map((q, idx) => (
                       <div
-                        key={index}
-                        style={{
-                          background: "var(--bg-ter)",
-                          padding: "1rem",
-                          borderRadius: "10px",
-                          border: "1px solid rgba(var(--shadow-rgb),0.1)",
-                        }}
+                        key={idx}
+                        className="
+                          hi-fade bg-[var(--bg-ter)]
+                          border border-[rgba(var(--shadow-rgb),.12)]
+                          rounded-[var(--radius)] p-3
+                        "
                       >
-                        <p
-                          className="text-sm font-medium mb-2"
-                          style={{ color: "var(--txt)" }}
-                        >
+                        <p className="text-xs font-semibold text-[var(--txt)] leading-snug mb-2">
                           {q.questionText}
                         </p>
-
-                        <ul
-                          className="text-xs mb-2"
-                          style={{ color: "var(--txt-dim)" }}
-                        >
+                        <ul className="flex flex-col gap-0.5 mb-3">
                           {q.options.map((opt, i) => (
-                            <li key={i}>
-                              {opt.text} {q.correctOptionIndex === i && "✅"}
+                            <li
+                              key={i}
+                              className={`
+                                text-[11px] px-2 py-1 rounded-md
+                                ${
+                                  q.correctOptionIndex === i
+                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                    : "text-[var(--txt-dim)]"
+                                }
+                              `}
+                            >
+                              <span className="font-semibold mr-1">
+                                {OPTION_LETTERS[i]}.
+                              </span>
+                              {opt.text}
+                              {q.correctOptionIndex === i && (
+                                <CheckCircle2
+                                  size={10}
+                                  className="inline ml-1 mb-0.5"
+                                />
+                              )}
                             </li>
                           ))}
                         </ul>
 
-                        <div className="flex items-center justify-between gap-2">
-                          <div
-                            className="flex gap-2 text-xs"
-                            style={{ color: "var(--txt-disabled)" }}
-                          >
-                            <span>Marks: {q.marks}</span>
-                            <span>⏱ {q.timeLimit}s</span>
+                        {/* Card footer */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex gap-1.5">
+                            <Badge>
+                              <Trophy size={9} />
+                              {q.marks} pt
+                            </Badge>
+                            <Badge>
+                              <Clock size={9} />
+                              {q.timeLimit}s
+                            </Badge>
                           </div>
-
-                          <div className="flex gap-2">
+                          <div className="flex gap-1.5">
                             <button
                               onClick={() => handleAddAIQuestion(q)}
-                              className="p-1.5 rounded transition"
-                              style={{
-                                backgroundColor: "var(--btn)",
-                                color: "white",
-                              }}
-                              title="Add to questions"
+                              aria-label="Add to question list"
+                              className="
+                                w-7 h-7 rounded-md flex items-center justify-center
+                                bg-[var(--btn)] text-white
+                                hover:bg-[var(--btn-hover)] transition-colors"
                             >
-                              <Plus size={16} />
+                              <Plus size={13} />
                             </button>
                             <button
                               onClick={() => handleRemoveAIQuestion(q)}
-                              className="p-1.5 rounded transition"
-                              style={{
-                                backgroundColor: "#ef4444",
-                                color: "white",
-                              }}
-                              title="Remove"
+                              aria-label="Remove generated question"
+                              className="
+                                w-7 h-7 rounded-md flex items-center justify-center
+                                bg-red-500/15 text-red-400 border border-red-500/20
+                                hover:bg-red-500/25 transition-colors
+                              "
                             >
-                              <Trash2 size={16} />
+                              <Trash2 size={13} />
                             </button>
                           </div>
                         </div>
@@ -756,9 +517,375 @@ function HostInterface() {
               )}
             </div>
           </div>
-        )}
+        </aside>
+
+        {/* ════════════════════════════════════════════════
+            MAIN PANEL
+        ════════════════════════════════════════════════ */}
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* ── Top Bar ── */}
+          <header
+            className="
+              sticky top-0 z-20 flex items-center justify-between
+              px-6 h-[60px] flex-shrink-0
+              border-b border-[rgba(var(--shadow-rgb),.15)]
+            "
+            style={{ background: "var(--bg-sec)" }}
+          >
+            {/* Left: toggle + room info */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowAISidebar((v) => !v)}
+                aria-label="Toggle AI sidebar"
+                className="
+                  w-8 h-8 rounded-lg flex items-center justify-center
+                  bg-[rgba(var(--shadow-rgb),.15)] border border-[rgba(var(--shadow-rgb),.2)]
+                  text-[var(--btn)] hover:bg-[rgba(var(--shadow-rgb),.25)] transition-colors
+                "
+              >
+                {showAISidebar ? (
+                  <ChevronLeft size={16} />
+                ) : (
+                  <ChevronRight size={16} />
+                )}
+              </button>
+
+              <Gamepad2 size={18} className="text-[var(--btn)]" />
+
+              <span
+                className="
+                  text-xs font-bold tracking-widest uppercase text-[var(--btn)]
+                  bg-[rgba(var(--shadow-rgb),.18)] border border-[rgba(var(--shadow-rgb),.3)]
+                  rounded-md px-3 py-1.5"
+              >
+                Room · {roomId}
+              </span>
+
+              <span className="text-xs text-[var(--txt-dim)] hidden sm:block">
+                Host Panel
+              </span>
+            </div>
+
+            {/* Right: stats + start */}
+            <div className="flex items-center gap-2">
+              {/* Online participants */}
+              <div
+                className="
+                  flex items-center gap-2 text-xs text-[var(--txt-dim)]
+                  bg-[var(--bg-ter)] border border-[rgba(var(--shadow-rgb),.12)]
+                  rounded-md px-3 py-1.5"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <Users size={12} />
+                <span>{participants.length} online</span>
+              </div>
+
+              {/* Question count */}
+              <div
+                className="
+                  flex items-center gap-2 text-xs text-[var(--txt-dim)]
+                  bg-[var(--bg-ter)] border border-[rgba(var(--shadow-rgb),.12)]
+                  rounded-md px-3 py-1.5"
+              >
+                <ListChecks size={12} className="text-[var(--btn)]" />
+                <span>{questions.length} questions</span>
+              </div>
+
+              {/* Start contest */}
+              <button
+                onClick={handleStartContest}
+                disabled={questions.length === 0}
+                className="
+                  flex items-center gap-2 px-4 py-2 rounded-[var(--radius)]
+                  text-xs font-semibold bg-[var(--btn)] text-white
+                  hover:bg-[var(--btn-hover)] transition-colors duration-150
+                  disabled:bg-[var(--bg-ter)] disabled:text-[var(--txt-disabled)]
+                  disabled:cursor-not-allowed"
+              >
+                <PlayCircle size={14} />
+                Start Contest
+              </button>
+            </div>
+          </header>
+
+          {/* ── Two-column body ── */}
+          <div className="flex flex-1 min-h-0 overflow-hidden">
+            {/* LEFT — Add Question + Participants */}
+            <div
+              className="
+                flex flex-col w-[420px] flex-shrink-0
+                border-r border-[rgba(var(--shadow-rgb),.1)]
+                overflow-y-auto hi-scroll"
+            >
+              {/* Add Question Form */}
+              <div className="p-6">
+                <SectionTitle icon={CirclePlus}>Add Question</SectionTitle>
+
+                <form onSubmit={handleOnSubmit} className="flex flex-col gap-4">
+                  {/* Question text */}
+                  <div>
+                    <FieldLabel required>Question</FieldLabel>
+                    <Textarea
+                      rows={2}
+                      placeholder="Type your question here…"
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  {/* Options */}
+                  <div>
+                    <FieldLabel required>
+                      Options &amp; Correct Answer
+                    </FieldLabel>
+                    <div className="flex flex-col gap-2">
+                      {options.map((opt, i) => (
+                        <div key={i} className="flex items-center gap-2">
+                          {/* Letter */}
+                          <span className="w-5 text-center text-[11px] font-bold text-[var(--txt-disabled)] flex-shrink-0">
+                            {OPTION_LETTERS[i]}
+                          </span>
+
+                          <Input
+                            placeholder={`Option ${OPTION_LETTERS[i]}`}
+                            value={opt}
+                            onChange={(e) => handleOption(i, e.target.value)}
+                            required
+                          />
+
+                          {/* Correct radio */}
+                          <label className="flex items-center gap-1.5 cursor-pointer flex-shrink-0">
+                            <input
+                              type="radio"
+                              name="correctOption"
+                              checked={correctOptionIndex === i}
+                              onChange={() => setCorrectOptionIndex(i)}
+                              className="accent-purple-500 w-3.5 h-3.5 cursor-pointer"
+                            />
+                            <span
+                              className={`
+                                text-[10px] font-semibold whitespace-nowrap transition-colors
+                                ${
+                                  correctOptionIndex === i
+                                    ? "text-[var(--btn)]"
+                                    : "text-[var(--txt-disabled)]"
+                                }
+                              `}
+                            >
+                              Correct
+                            </span>
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Marks + Time */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <FieldLabel>
+                        <Trophy size={9} className="inline mr-1 mb-0.5" />
+                        Marks
+                      </FieldLabel>
+                      <Input
+                        type="number"
+                        min={1}
+                        value={marks}
+                        onChange={(e) => setMarks(Number(e.target.value))}
+                      />
+                    </div>
+                    <div>
+                      <FieldLabel>
+                        <Clock size={9} className="inline mr-1 mb-0.5" />
+                        Time (sec)
+                      </FieldLabel>
+                      <Input
+                        type="number"
+                        min={5}
+                        max={300}
+                        value={timeLimit}
+                        onChange={(e) => setTimeLimit(Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Add Question button */}
+                  <button
+                    type="submit"
+                    className="
+                      w-full py-2.5 rounded-[var(--radius)] text-sm font-semibold
+                      flex items-center justify-center gap-2
+                      bg-[var(--btn)] text-white
+                      hover:bg-[var(--btn-hover)] transition-colors duration-150"
+                  >
+                    <Plus size={15} />
+                    Add Question
+                  </button>
+                </form>
+
+                {/* Submit All */}
+                <button
+                  onClick={handleOnSubmitQuestion}
+                  className="
+                    mt-3 w-full py-2.5 rounded-[var(--radius)] text-sm font-semibold
+                    flex items-center justify-center gap-2
+                    bg-emerald-500/10 text-emerald-400 border border-emerald-500/20
+                    hover:bg-emerald-500/20 transition-colors duration-150"
+                >
+                  <CloudUpload size={15} />
+                  Submit All Questions
+                </button>
+              </div>
+
+              <Divider className="mx-6" />
+
+              {/* Participants */}
+              <div className="p-6">
+                <SectionTitle icon={Users} count={participants.length}>
+                  Participants
+                </SectionTitle>
+
+                {participants.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users
+                      size={28}
+                      className="mx-auto mb-2 opacity-20 text-[var(--btn)]"
+                    />
+                    <p className="text-xs text-[var(--txt-disabled)]">
+                      Waiting for players to join…
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {participants.map((p, i) => {
+                      const initials = (p.username || "??")
+                        .split(/[_\s-]/)
+                        .map((w) => w[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2);
+                      return (
+                        <div
+                          key={i}
+                          className="
+                            hi-fade flex items-center gap-3
+                            bg-[var(--bg-ter)] border border-[rgba(var(--shadow-rgb),.08)]
+                            rounded-[var(--radius)] px-3 py-2.5"
+                        >
+                          <div
+                            className="
+                              w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0
+                              bg-[rgba(var(--shadow-rgb),.25)] text-[var(--btn)]/90 text-[11px] font-semibold"
+                          >
+                            {initials}
+                          </div>
+                          <span className="text-sm text-[var(--txt)] flex-1">
+                            {p.username || "Anonymous"}
+                          </span>
+                          <span className="text-[10px] text-[var(--txt-disabled)] font-mono">
+                            #{String(p.userId).slice(-6)}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* RIGHT — Question List */}
+            <div className="flex-1 overflow-y-auto hi-scroll p-6 min-w-0">
+              <SectionTitle icon={ListChecks} count={questions.length}>
+                Question List
+              </SectionTitle>
+
+              {questions.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <div
+                    className="
+                      w-16 h-16 rounded-2xl flex items-center justify-center mb-4
+                      bg-[rgba(var(--shadow-rgb),.12)] border border-[rgba(var(--shadow-rgb),.15)]"
+                  >
+                    <ListChecks
+                      size={28}
+                      className="text-[var(--btn)] opacity-40"
+                    />
+                  </div>
+                  <p className="text-sm text-[var(--txt-disabled)] mb-1">
+                    No questions added yet
+                  </p>
+                  <p className="text-xs text-[var(--txt-disabled)] opacity-60">
+                    Use the form on the left or generate with AI
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  {questions.map((q, idx) => (
+                    <div
+                      key={idx}
+                      className="
+                        hi-fade bg-[var(--bg-sec)]
+                        border border-[rgba(var(--shadow-rgb),.1)] rounded-xl p-4
+                        hover:border-[rgba(var(--shadow-rgb),.25)] transition-colors duration-150"
+                    >
+                      {/* Number + text */}
+                      <p className="text-[10px] font-bold tracking-widest uppercase text-[var(--btn)] mb-1.5">
+                        Question {String(idx + 1).padStart(2, "0")}
+                      </p>
+                      <p className="text-sm font-semibold text-[var(--txt)] leading-snug mb-3">
+                        {q.questionText}
+                      </p>
+
+                      {/* Options grid */}
+                      <div className="grid grid-cols-2 gap-1.5 mb-3">
+                        {q.options.map((opt, i) => (
+                          <div
+                            key={i}
+                            className={`
+                              text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5
+                              ${
+                                q.correctOptionIndex === i
+                                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                  : "bg-[var(--bg-ter)] text-[var(--txt-dim)]"
+                              }
+                            `}
+                          >
+                            <span className="font-bold opacity-60">
+                              {OPTION_LETTERS[i]}.
+                            </span>
+                            <span className="truncate">{opt.text}</span>
+                            {q.correctOptionIndex === i && (
+                              <CheckCircle2
+                                size={11}
+                                className="ml-auto flex-shrink-0"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Badges */}
+                      <div className="flex gap-2">
+                        <Badge>
+                          <Trophy size={9} />
+                          {q.marks} pt
+                        </Badge>
+                        <Badge>
+                          <Clock size={9} />
+                          {q.timeLimit}s
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        {/* ── end main panel ── */}
       </div>
-    </div>
+    </>
   );
 }
 

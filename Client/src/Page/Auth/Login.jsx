@@ -1,42 +1,42 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { LogIn, Mail, Lock, AlertCircle } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   // If user is already logged in, skip login screen
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) navigate('/dashboard', { replace: true });
+    const token = localStorage.getItem("token");
+    if (token) navigate("/home", { replace: true });
   }, [navigate]);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
-    setError('');
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      navigate('/dashboard');
+      navigate("/home");
     } else {
       setError(result.error);
     }
@@ -45,7 +45,10 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    <div
+      className="min-h-screen flex items-center justify-center p-4"
+      style={{ backgroundColor: "var(--bg-primary)" }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -56,16 +59,19 @@ const Login = () => {
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200 }}
+            transition={{ type: "spring", stiffness: 200 }}
             className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-            style={{ backgroundColor: 'var(--btn)' }}
+            style={{ backgroundColor: "var(--btn)" }}
           >
             <LogIn className="w-8 h-8 text-white" />
           </motion.div>
-          <h1 className="text-3xl font-bold mb-2" style={{ color: 'var(--txt)' }}>
+          <h1
+            className="text-3xl font-bold mb-2"
+            style={{ color: "var(--txt)" }}
+          >
             Welcome Back
           </h1>
-          <p style={{ color: 'var(--txt-dim)' }}>
+          <p style={{ color: "var(--txt-dim)" }}>
             Sign in to continue to Learning Journey
           </p>
         </div>
@@ -76,7 +82,7 @@ const Login = () => {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
           className="rounded-2xl p-8 shadow-2xl"
-          style={{ backgroundColor: 'var(--bg-sec)' }}
+          style={{ backgroundColor: "var(--bg-sec)" }}
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
@@ -93,11 +99,17 @@ const Login = () => {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--txt)' }}>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--txt)" }}
+              >
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: 'var(--txt-dim)' }} />
+                <Mail
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                  style={{ color: "var(--txt-dim)" }}
+                />
                 <input
                   type="email"
                   name="email"
@@ -105,9 +117,9 @@ const Login = () => {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: 'var(--bg-ter)',
-                    borderColor: 'var(--bg-ter)',
-                    color: 'var(--txt)'
+                    backgroundColor: "var(--bg-ter)",
+                    borderColor: "var(--bg-ter)",
+                    color: "var(--txt)",
                   }}
                   placeholder="you@example.com"
                   required
@@ -117,11 +129,17 @@ const Login = () => {
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium mb-2" style={{ color: 'var(--txt)' }}>
+              <label
+                className="block text-sm font-medium mb-2"
+                style={{ color: "var(--txt)" }}
+              >
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: 'var(--txt-dim)' }} />
+                <Lock
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5"
+                  style={{ color: "var(--txt-dim)" }}
+                />
                 <input
                   type="password"
                   name="password"
@@ -129,9 +147,9 @@ const Login = () => {
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 rounded-lg border transition-all"
                   style={{
-                    backgroundColor: 'var(--bg-ter)',
-                    borderColor: 'var(--bg-ter)',
-                    color: 'var(--txt)'
+                    backgroundColor: "var(--bg-ter)",
+                    borderColor: "var(--bg-ter)",
+                    color: "var(--txt)",
                   }}
                   placeholder="••••••••"
                   required
@@ -146,7 +164,7 @@ const Login = () => {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="w-full py-3 rounded-lg font-semibold text-white flex items-center justify-center gap-2 disabled:opacity-50"
-              style={{ backgroundColor: 'var(--btn)' }}
+              style={{ backgroundColor: "var(--btn)" }}
             >
               {loading ? (
                 <>
@@ -164,9 +182,13 @@ const Login = () => {
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
-            <p style={{ color: 'var(--txt-dim)' }}>
-              Don't have an account?{' '}
-              <Link to="/signup" className="font-semibold hover:underline" style={{ color: 'var(--btn)' }}>
+            <p style={{ color: "var(--txt-dim)" }}>
+              Don't have an account?{" "}
+              <Link
+                to="/signup"
+                className="font-semibold hover:underline"
+                style={{ color: "var(--btn)" }}
+              >
                 Sign up
               </Link>
             </p>

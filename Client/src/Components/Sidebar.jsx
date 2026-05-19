@@ -18,7 +18,7 @@ export default function Sidebar() {
   // Map URL paths to sidebar IDs
   const pathToId = {
     "/home": "home",
-    "/dashboard": "home",
+    "/home": "home",
     "/session": "session",
     "/aboutus": "about",
     "/settings": "settings",
@@ -46,27 +46,29 @@ export default function Sidebar() {
     }
   }, [active]);
 
-  const SidebarLink = forwardRef(({ IconComponent, label, id, onClick }, ref) => {
-    const isActive = active === id;
-    return (
-      <div
-        ref={ref}
-        onClick={onClick}
-        className="relative flex flex-col items-center justify-center pt-2.5 pb-2 group cursor-pointer hover:bg-[var(--bg-ter)] rounded-[var(--radius)] transition-colors"
-      >
-        <IconComponent
-          className={`size-5 2xl:size-6 transition-colors duration-300 ${
-            isActive
-              ? "text-[var(--txt)]"
-              : "text-[var(--txt-dim)] group-hover:text-[var(--txt)]"
-          }`}
-        />
-        <span className="text-xs text-[var(--txt-dim)] group-hover:text-[var(--txt)]">
-          {label}
-        </span>
-      </div>
-    );
-  });
+  const SidebarLink = forwardRef(
+    ({ IconComponent, label, id, onClick }, ref) => {
+      const isActive = active === id;
+      return (
+        <div
+          ref={ref}
+          onClick={onClick}
+          className="relative flex flex-col items-center justify-center pt-2.5 pb-2 group cursor-pointer hover:bg-[var(--bg-ter)] rounded-[var(--radius)] transition-colors"
+        >
+          <IconComponent
+            className={`size-5 2xl:size-6 transition-colors duration-300 ${
+              isActive
+                ? "text-[var(--txt)]"
+                : "text-[var(--txt-dim)] group-hover:text-[var(--txt)]"
+            }`}
+          />
+          <span className="text-xs text-[var(--txt-dim)] group-hover:text-[var(--txt)]">
+            {label}
+          </span>
+        </div>
+      );
+    },
+  );
   SidebarLink.displayName = "SidebarLink";
 
   return (
@@ -91,7 +93,7 @@ export default function Sidebar() {
             IconComponent={Home}
             label="Home"
             ref={(el) => (linkRefs.current["home"] = el)}
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/home")}
           />
           <SidebarLink
             id="session"
