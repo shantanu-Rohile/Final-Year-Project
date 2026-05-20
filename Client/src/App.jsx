@@ -5,9 +5,6 @@ import Layout from "./Layout";
 
 // Pages
 // "Dashboard" is our post-login home experience
-import Dashboard from "./Page/Home";
-import HostWait from "./Page/WaitingLobby/HostWaitingLobby";
-import StudentWait from "./Page/WaitingLobby/WaitingLobby";
 import Session from "./Page/Session";
 import FinalLeaderboard from "./Page/Session/FinalLeaderboard";
 import AboutUs from "./Page/AboutUs";
@@ -25,7 +22,7 @@ import { AuthProvider } from "./context/AuthContext";
 import Quiz from "./Page/Session/Quiz";
 import CreateRoom from "./Page/Session/CreateRoom";
 import Main from "./Page/Real-Time/Main.jsx";
-import Room from "./Page/Real-Time/Room.jsx"
+import Room from "./Page/Real-Time/Room.jsx";
 
 function App() {
   return (
@@ -33,7 +30,7 @@ function App() {
       <Router>
         <Routes>
           {/* ---------------- PUBLIC ---------------- */}
-          {/* At "/" we show login (if already logged in, redirect to /dashboard) */}
+          {/* At "/" we show login (if already logged in, redirect to /home) */}
           <Route
             path="/"
             element={
@@ -69,10 +66,10 @@ function App() {
           >
             {/* Home after login */}
             <Route path="/home" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/session" element={<Session />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/realRoom/:userId" element={<Main />} />
           </Route>
 
           {/* ------ PROTECTED (NO SIDEBAR) ------ */}
@@ -90,11 +87,7 @@ function App() {
             />
             <Route path="/quiz/:roomId" element={<Quiz />} />
 
-            <Route path="/hostwait" element={<HostWait />} />
-            <Route path="/studwait" element={<StudentWait />} />
-
             {/* Real-time rooms (Socket.IO) */}
-            <Route path="/realRoom/:userId" element={<Main />} />
             <Route path="/room/:userId/:roomId" element={<Room />} />
           </Route>
         </Routes>

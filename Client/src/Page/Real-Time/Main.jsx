@@ -56,11 +56,25 @@ function Main() {
     }
   };
 
-  const handleJoinRoom = (e) => {
+  const handleJoinRoom = async (e) => {
     e.preventDefault();
     if (!roomId) return;
-    navigate(`/room/${userId}/${roomId.trim().toUpperCase()}`);
-    setRoomId("");
+
+    try {
+      const trimmedRoomId = roomId.trim().toUpperCase();
+      // Check if room exists before navigating
+      await axios.get(`${API_URL}/api/real-rooms/${trimmedRoomId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      navigate(`/room/${userId}/${trimmedRoomId}`);
+      setRoomId("");
+    } catch (err) {
+      console.error("Join Error:", err);
+      alert(err?.response?.data?.message || "Room does not exist or failed to join");
+    }
   };
 
   return (
