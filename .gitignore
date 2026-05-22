@@ -1,0 +1,64 @@
+# ===========================
+# Dependencies
+# ===========================
+node_modules/
+.pnp
+.pnp.js
+
+# ===========================
+# Environment Variables
+# ===========================
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ===========================
+# Build Output
+# ===========================
+dist/
+build/
+client/dist/
+client/build/
+
+# ===========================
+# Logs
+# ===========================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===========================
+# OS Files
+# ===========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===========================
+# Editor / IDE
+# ===========================
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ===========================
+# uploads (user-generated files)
+# ===========================
+uploads/
+public/uploads/
+
+# ===========================
+# Misc
+# ===========================
+.cache/
+.parcelcache/
+coverage/
+*.tsbuildinfo
