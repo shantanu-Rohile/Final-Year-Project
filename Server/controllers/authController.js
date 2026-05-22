@@ -1,4 +1,4 @@
-import User from '../models/User.js';
+import User from '../Models/User.js';
 import { generateToken } from '../middleware/auth.js';
 import fs from "fs";
 import path from "path";

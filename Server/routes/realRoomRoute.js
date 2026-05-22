@@ -1,4 +1,4 @@
-import Rooms from "../models/roomModel.js";
+import Rooms from "../Models/roomModel.js";
 import express from "express";
 import { protect } from "../middleware/auth.js";
 import crypto from "crypto";
