@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import http from "http";
+import dns from "dns"
 import { Server as SocketIOServer } from "socket.io";
 import connectDB from "./config/database.js";
 // import { startCronJobs } from './utils/cronJobs.js';
@@ -19,6 +20,7 @@ import { registerRealtimeRoomSockets } from "./utils/realtimeRoomSockets.js";
 dotenv.config();
 
 const app = express();
+dns.setServers(["1.1.1.1","8.8.8.8"]);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 const PORT = process.env.PORT || 5000;
