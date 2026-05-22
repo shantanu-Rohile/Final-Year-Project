@@ -13,12 +13,15 @@ import roomRoutes from "./routes/roomRoute.js";
 import savedRoomRoutes from "./routes/savedRoom.js";
 import quizRoutes from "./routes/quizRoute.js";
 import realRoomRoutes from "./routes/realRoomRoute.js";
+import dns from "dns"
 
 import { registerRealtimeRoomSockets } from "./utils/realtimeRoomSockets.js";
 
 dotenv.config();
 
 const app = express();
+
+dns.setServers(["1.1.1.1","8.8.8.8"]);
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 const PORT = process.env.PORT || 5000;
