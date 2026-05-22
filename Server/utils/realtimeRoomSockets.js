@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import Rooms from "../Models/roomModel.js";
+import Rooms from "../models/roomModel.js";
 
 function getTokenFromSocket(socket) {
   return socket?.handshake?.auth?.token || null;
