@@ -15,9 +15,8 @@ export default function Sidebar() {
   const location = useLocation();
   const { user } = useAuth();
 
-  // Map URL paths to sidebar IDs
+  // Map URL paths to sidebar IDs (exact matches)
   const pathToId = {
-    "/home": "home",
     "/home": "home",
     "/session": "session",
     "/aboutus": "about",
@@ -26,24 +25,36 @@ export default function Sidebar() {
 
   // Sync active state with URL
   useEffect(() => {
-    const currentId = pathToId[location.pathname];
+    const path = location.pathname;
+    let currentId;
+
+    if (path.startsWith("/realRoom")) {
+      currentId = "realtime";
+    } else {
+      currentId = pathToId[path];
+    }
+
     if (currentId) setActive(currentId);
   }, [location.pathname]);
 
   // Update indicator position when active changes
   useEffect(() => {
-    const activeLink = linkRefs.current[active];
-    if (sidebarRef.current && activeLink) {
-      const containerRect = sidebarRef.current.getBoundingClientRect();
-      const linkRect = activeLink.getBoundingClientRect();
-      const indicatorHeight = 32;
-      const top =
-        linkRect.top -
-        containerRect.top +
-        linkRect.height / 2 -
-        indicatorHeight / 2;
-      setIndicatorPos({ top });
-    }
+    const raf = requestAnimationFrame(() => {
+      const activeLink = linkRefs.current[active];
+      if (sidebarRef.current && activeLink) {
+        const containerRect = sidebarRef.current.getBoundingClientRect();
+        const linkRect = activeLink.getBoundingClientRect();
+        const indicatorHeight = 32;
+        const top =
+          linkRect.top -
+          containerRect.top +
+          linkRect.height / 2 -
+          indicatorHeight / 2;
+        setIndicatorPos({ top });
+      }
+    });
+
+    return () => cancelAnimationFrame(raf);
   }, [active]);
 
   const SidebarLink = forwardRef(
