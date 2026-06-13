@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { Loader2, Trophy } from "lucide-react";
 
 import WaitingLobby from "./Room/WaitingLobby";
 import HostInterface from "./Room/HostInterface";
@@ -65,8 +66,14 @@ function Room() {
 
   if (loading)
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "var(--bg-primary)", color: "var(--txt)" }}>
-        <p style={{ color: "var(--txt-dim)" }}>Loading room…</p>
+      <div className="min-h-screen w-full bg-white flex items-center justify-center px-4">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-500 shadow-lg shadow-purple-200">
+            <Trophy className="h-8 w-8 text-white" />
+            <Loader2 className="absolute -bottom-2 -right-2 h-6 w-6 animate-spin text-purple-500" />
+          </div>
+          <p className="text-sm font-semibold text-slate-500">Loading room…</p>
+        </div>
       </div>
     );
 

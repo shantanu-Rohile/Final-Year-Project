@@ -26,9 +26,19 @@ export default function Sidebar() {
 
   // Sync active state with URL
   useEffect(() => {
-    const currentId = pathToId[location.pathname];
-    if (currentId) setActive(currentId);
-  }, [location.pathname]);
+  if (
+    location.pathname.startsWith("/realRoom") ||
+    location.pathname.startsWith("/room")
+  ) {
+    setActive("realtime");
+    return;
+  }
+
+  const currentId = pathToId[location.pathname];
+  if (currentId) {
+    setActive(currentId);
+  }
+}, [location.pathname]);
 
   // Update indicator position when active changes
   useEffect(() => {

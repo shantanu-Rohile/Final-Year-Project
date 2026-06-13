@@ -115,11 +115,22 @@ export default function Themes() {
     applyTheme(id);
   };
 
-  return (
-    <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-      <h2 style={{ fontSize: "24px", marginBottom: "20px" }}>
-        Choose Your Theme
-      </h2>
+ return (
+  <div
+    style={{
+      maxWidth: "1200px",
+      margin: "0 auto",
+      color: "var(--txt)",
+    }}
+  >
+    <h2
+      style={{
+        fontSize: "24px",
+        marginBottom: "20px",
+      }}
+    >
+      Choose Your Theme
+    </h2>
 
       <div
         style={{

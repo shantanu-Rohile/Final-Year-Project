@@ -2,8 +2,36 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import { io } from "socket.io-client";
+import {
+  Loader2,
+  Trophy,
+  Clock,
+  Crown,
+  Medal,
+  CheckCircle2,
+  PlayCircle,
+} from "lucide-react";
 import { API_URL, SOCKET_URL } from "../../../config/backend.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
+
+const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"];
+
+/* ── Smooth slide-in animation for question transitions ── */
+const questionTransitionStyle = `
+  @keyframes questionSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .question-enter {
+    animation: questionSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+`;
 
 function Participant() {
   const { userId, roomId } = useParams();
@@ -51,8 +79,6 @@ function Participant() {
         setQuestions(roomRes.data.questions || []);
         setHostId(roomRes.data.host);
         setStatus(roomRes.data.status);
-
-        // Individual progression is controlled by socket sync-state
       } catch (err) {
         console.error(err);
       } finally {
@@ -97,7 +123,6 @@ function Participant() {
       setStatus("live");
     });
 
-    // Individual progression updates
     socketRef.current.on("your-state", (p) => {
       if (!p) return;
       if (typeof p.currentQuestionIndex === "number") setCurrentQuestionIndex(p.currentQuestionIndex);
@@ -124,7 +149,6 @@ function Participant() {
   /* ================= BACK BUTTON BEHAVIOR ================= */
 
   useEffect(() => {
-    // If user hits the browser Back button during the test, they leave the test.
     window.history.pushState(null, "", window.location.href);
 
     const onPopState = () => {
@@ -135,7 +159,7 @@ function Participant() {
     return () => window.removeEventListener("popstate", onPopState);
   }, [navigate, effectiveUserId]);
 
-  /* ================= TIMER (SYNCED) ================= */
+  /* ================= TIMER (SYNCED + SMOOTH) ================= */
 
   useEffect(() => {
     if (!questions.length) return;
@@ -147,12 +171,12 @@ function Participant() {
     const q = questions[currentQuestionIndex];
     const limit = q?.timeLimit || 30;
 
+    // Tick every second for smooth 1s bar transition
     const tick = () => {
       const elapsed = Math.floor((Date.now() - new Date(questionStartedAt).getTime()) / 1000);
       const remaining = Math.max(0, limit - elapsed);
       setTimeLeft(remaining);
 
-      // If time runs out and user hasn't answered, auto-advance with a null submission.
       if (remaining === 0 && q?._id && !answeredQuestions.has(q._id)) {
         socketRef.current?.emit("submit-answer", {
           roomId,
@@ -170,7 +194,8 @@ function Participant() {
 
     tick();
     if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(tick, 250);
+    // Use 1000ms so the CSS transition: width 1s linear lines up perfectly
+    timerRef.current = setInterval(tick, 1000);
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -211,122 +236,445 @@ function Participant() {
     socketRef.current?.emit("start-contest", { roomId });
   };
 
-  // host does not control pacing anymore
-
-  if (loading) return <div style={{ color: "white" }}>Loading...</div>;
+  if (loading)
+    return (
+      <div className="min-h-screen w-full bg-white flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+      </div>
+    );
 
   const currentQuestion = currentQuestionIndex >= 0 ? questions[currentQuestionIndex] : null;
   const currentQuestionId = currentQuestion?._id;
   const alreadyAnswered = currentQuestionId ? answeredQuestions.has(currentQuestionId) : false;
 
+  const progressPct = currentQuestion?.timeLimit
+    ? Math.max(0, Math.min(100, (timeLeft / currentQuestion.timeLimit) * 100))
+    : 0;
+
   /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8" style={{ backgroundColor: "var(--bg-primary)", color: "var(--txt)" }}>
-      <div className="w-full max-w-4xl rounded-[var(--radius)] border p-6" style={{ backgroundColor: "var(--bg-sec)", borderColor: "rgba(var(--shadow-rgb),0.2)" }}>
-        <h2 className="text-center mb-3">Hi {username}</h2>
+    <div className="min-h-screen w-full bg-white relative overflow-hidden">
+      {/* Inject keyframe animation */}
+      <style>{questionTransitionStyle}</style>
 
-        {status === "waiting" && isHost && (
-          <div style={{ textAlign: "center" }}>
-            <p style={{ opacity: 0.85 }}>Upload questions in the Host Panel, then start the contest.</p>
-            <button
-              onClick={startContestAsHost}
-              style={{
-                backgroundColor: "#3498db",
-                border: "none",
-                padding: "12px 18px",
-                borderRadius: "10px",
-                color: "white",
-                fontWeight: "600",
-              }}
-              disabled={!questions.length}
-            >
-              Start Contest
-            </button>
-          </div>
-        )}
+      {/* Ambient background glows */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-purple-200/60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 -right-40 h-[28rem] w-[28rem] rounded-full bg-purple-100 blur-3xl" />
 
-        {status === "waiting" && !isHost && (
-          <p style={{ textAlign: "center", opacity: 0.85 }}>Waiting for host to start…</p>
-        )}
-
-        {!contestCompleted && status === "live" && currentQuestion && (
-          <>
-            <h4 className="text-center mb-4">
-              ⏳ Time Left: <span style={{ color: "#ff9f1a" }}>{timeLeft}s</span>
-            </h4>
-
-            <div
-              style={{
-                background: "rgba(0,0,0,0.35)",
-                padding: "1.5rem",
-                borderRadius: "12px",
-                marginBottom: "1.5rem",
-              }}
-            >
-              <h4>
-                Q{currentQuestionIndex + 1}. {currentQuestion.questionText}
-              </h4>
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-10">
+        {/*
+          During live contest: max-w-5xl wide card to accommodate two-column layout.
+          Otherwise: max-w-2xl narrow card for waiting/ended states.
+        */}
+        <div
+          className={`w-full rounded-3xl border border-purple-100 bg-white p-6 shadow-[0_10px_40px_-15px_rgba(124,58,237,0.25)] sm:p-8 ${
+            status === "live" && !contestCompleted ? "max-w-5xl" : "max-w-2xl"
+          }`}
+        >
+          {/* ── Header ── */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-600 to-fuchsia-500 text-sm font-bold text-white">
+                {(username || "?").charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-900">Hi, {username}</p>
+                {isHost && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-purple-500">
+                    <Crown className="h-3 w-3" /> Host
+                  </span>
+                )}
+              </div>
             </div>
 
-            {currentQuestion.options.map((opt, i) => {
-              const selected = selectedByQuestionId[currentQuestionId] === i;
-
-              return (
-                <div
-                  key={i}
-                  onClick={() => submitAnswer(currentQuestionId, i)}
-                  style={{
-                    background: selected
-                      ? "rgba(255,255,255,0.12)"
-                      : "rgba(0,0,0,0.35)",
-                    padding: "1rem",
-                    borderRadius: "10px",
-                    marginBottom: "0.7rem",
-                    cursor: alreadyAnswered || timeLeft <= 0 ? "not-allowed" : "pointer",
-                    opacity: alreadyAnswered ? 0.7 : 1,
-                    pointerEvents: alreadyAnswered || timeLeft <= 0 ? "none" : "auto",
-                    transition: "0.2s",
-                  }}
-                >
-                  {String.fromCharCode(65 + i)}. {opt.text}
-                </div>
-              );
-            })}
-
-            {/* Individual-paced contest: no host-driven next-question */}
-          </>
-        )}
-
-        {status !== "waiting" && (
-          <div style={{ marginTop: "2rem" }}>
-            <h2 className="text-center mb-4">🏆 {contestCompleted ? "Final Leaderboard" : "Leaderboard"}</h2>
-
-            {leaderboard.length === 0 && (
-              <p style={{ textAlign: "center", opacity: 0.75 }}>Waiting for leaderboard…</p>
-            )}
-
-            {leaderboard.map((u, i) => (
-              <div
-                key={i}
-                style={{
-                  background:
-                    i === 0 ? "linear-gradient(90deg,#ffd70033,#ffffff11)" : "rgba(0,0,0,0.35)",
-                  padding: "1rem",
-                  borderRadius: "10px",
-                  marginBottom: "0.6rem",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span>
-                  #{i + 1} {u.username}
-                </span>
-                <span style={{ color: "#ff9f1a", fontWeight: "bold" }}>{u.score}</span>
-              </div>
-            ))}
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wider ${
+                status === "live"
+                  ? "bg-emerald-50 text-emerald-600"
+                  : status === "ended"
+                  ? "bg-purple-50 text-purple-600"
+                  : "bg-amber-50 text-amber-600"
+              }`}
+            >
+              {status === "live" ? "Live" : status === "ended" ? "Ended" : "Waiting"}
+            </span>
           </div>
-        )}
+
+          {/* ── WAITING — HOST ── */}
+          {status === "waiting" && isHost && (
+            <div className="mt-8 flex flex-col items-center gap-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-500 shadow-lg shadow-purple-200">
+                <PlayCircle className="h-7 w-7 text-white" />
+              </div>
+              <p className="text-sm text-slate-500">
+                Upload questions in the Host Panel, then start the contest when everyone's ready.
+              </p>
+              <button
+                onClick={startContestAsHost}
+                disabled={!questions.length}
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-6 py-2.5 text-sm font-semibold text-white shadow-md shadow-purple-200 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <Trophy className="h-4 w-4" />
+                Start Contest
+              </button>
+            </div>
+          )}
+
+          {/* ── WAITING — PLAYER ── */}
+          {status === "waiting" && !isHost && (
+            <div className="mt-8 flex flex-col items-center gap-3 text-center">
+              <span className="relative flex h-3 w-3">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-purple-500" />
+              </span>
+              <p className="text-sm font-semibold text-slate-500">
+                Waiting for the host to start…
+              </p>
+            </div>
+          )}
+
+          {/* ── LIVE: Two-column layout ── */}
+          {status === "live" && !contestCompleted && (
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6 items-start">
+
+              {/* ── LEFT: Active Question ── */}
+              {currentQuestion ? (
+                <div
+                  key={currentQuestionIndex}
+                  className="question-enter"
+                >
+                  {/* Timer bar */}
+                  <div className="mb-5 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+                      <Clock className="h-5 w-5" />
+                    </div>
+                    <div className="flex-1">
+                      <div className="mb-1 flex items-center justify-between text-xs font-semibold text-slate-400">
+                        <span>
+                          Question {currentQuestionIndex + 1} of {questions.length}
+                        </span>
+                        <span className={timeLeft <= 5 ? "text-rose-500" : "text-purple-600"}>
+                          {timeLeft}s
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-purple-50">
+                        <div
+                          className={`h-full rounded-full ${
+                            timeLeft <= 5
+                              ? "bg-rose-400"
+                              : "bg-gradient-to-r from-purple-600 to-fuchsia-500"
+                          }`}
+                          style={{
+                            width: `${progressPct}%`,
+                            /* Matches the 1s tick interval for a perfectly smooth sweep */
+                            transition: "width 1s linear",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Question card */}
+                  <div className="mb-5 rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-500 p-5 text-white shadow-md shadow-purple-200">
+                    <p className="text-xs font-bold uppercase tracking-wider text-purple-100">
+                      Question {currentQuestionIndex + 1}
+                    </p>
+                    <h3 className="mt-1 text-lg font-bold leading-snug">
+                      {currentQuestion.questionText}
+                    </h3>
+                  </div>
+
+                  {/* Options */}
+                  <div className="space-y-2.5">
+                    {currentQuestion.options.map((opt, i) => {
+                      const selected = selectedByQuestionId[currentQuestionId] === i;
+                      const disabled = alreadyAnswered || timeLeft <= 0;
+
+                      return (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => submitAnswer(currentQuestionId, i)}
+                          disabled={disabled}
+                          className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3 text-left text-sm font-medium transition ${
+                            selected
+                              ? "border-purple-400 bg-purple-50 text-purple-700 ring-2 ring-purple-200"
+                              : "border-purple-100 bg-white text-slate-700 hover:border-purple-200 hover:bg-purple-50/60"
+                          } ${disabled && !selected ? "opacity-50" : ""} ${
+                            disabled ? "cursor-not-allowed" : "cursor-pointer"
+                          }`}
+                        >
+                          <span
+                            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xs font-bold ${
+                              selected
+                                ? "bg-purple-600 text-white"
+                                : "bg-purple-50 text-purple-500"
+                            }`}
+                          >
+                            {OPTION_LETTERS[i] || i + 1}
+                          </span>
+                          <span className="flex-1">{opt.text}</span>
+                          {selected && (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-purple-500" />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {alreadyAnswered && (
+                    <p className="mt-3 text-center text-xs font-semibold text-purple-400">
+                      Answer locked in — waiting for the next question…
+                    </p>
+                  )}
+                </div>
+              ) : (
+                /* Waiting for first question to arrive */
+                <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+                  <span className="relative flex h-3 w-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-purple-400 opacity-75" />
+                    <span className="relative inline-flex h-3 w-3 rounded-full bg-purple-500" />
+                  </span>
+                  <p className="text-sm font-semibold text-slate-500">
+                    Loading your first question…
+                  </p>
+                </div>
+              )}
+
+              {/* ── RIGHT: Live Leaderboard ── */}
+              <div className="rounded-2xl border border-purple-100 bg-purple-50/40 p-4">
+                <div className="mb-4 flex items-center gap-2">
+                  <Trophy className="h-4 w-4 text-amber-400" />
+                  <h2 className="text-sm font-extrabold text-slate-900">Live Leaderboard</h2>
+                </div>
+
+                {leaderboard.length === 0 ? (
+                  <p className="text-center text-xs text-slate-400 py-4">
+                    Waiting for scores…
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {leaderboard.map((u, idx) => {
+                      const isMe = u.username === username;
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-center justify-between gap-3 rounded-xl border px-3 py-2.5 ${
+                            idx === 0
+                              ? "border-amber-200 bg-gradient-to-r from-amber-50 to-purple-50"
+                              : isMe
+                              ? "border-purple-200 bg-white"
+                              : "border-purple-100 bg-white"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-purple-50 text-xs font-bold text-purple-600">
+                              {idx === 0 ? (
+                                <Crown className="h-3.5 w-3.5 text-amber-500" />
+                              ) : idx === 1 ? (
+                                <Medal className="h-3.5 w-3.5 text-slate-400" />
+                              ) : idx === 2 ? (
+                                <Medal className="h-3.5 w-3.5 text-amber-700" />
+                              ) : (
+                                `#${idx + 1}`
+                              )}
+                            </span>
+                            <span className="text-xs font-semibold text-slate-800 truncate max-w-[100px]">
+                              {u.username}
+                              {isMe && (
+                                <span className="ml-1.5 rounded-full bg-purple-100 px-1.5 py-0.5 text-[9px] font-bold uppercase text-purple-600">
+                                  You
+                                </span>
+                              )}
+                            </span>
+                          </div>
+                          <span className="text-xs font-extrabold text-purple-600 shrink-0">
+                            {u.score} pts
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ── COMPLETED: Final Leaderboard (full width) ── */}
+          {contestCompleted && (
+            <div className="mt-8">
+              <div className="mb-4 flex items-center justify-center gap-2">
+                <Trophy className="h-5 w-5 text-amber-400" />
+                <h2 className="text-lg font-extrabold text-slate-900">Final Leaderboard</h2>
+              </div>
+
+              {leaderboard.length === 0 && (
+                <p className="text-center text-sm text-slate-400">
+                  Waiting for leaderboard…
+                </p>
+              )}
+
+              {/* Podium — top 3 */}
+              {leaderboard.length > 0 && (
+                <div className="mb-6 flex items-end justify-center gap-3 sm:gap-4">
+                  {[1, 0, 2]
+                    .filter((i) => leaderboard[i])
+                    .map((i) => {
+                      const u = leaderboard[i];
+                      const isMe = u.username === username;
+                      const podium = {
+                        0: {
+                          height: "h-32",
+                          ring: "ring-amber-300",
+                          badge: "bg-gradient-to-br from-amber-400 to-amber-300",
+                          bar: "bg-gradient-to-t from-purple-600 to-fuchsia-500",
+                        },
+                        1: {
+                          height: "h-24",
+                          ring: "ring-slate-300",
+                          badge: "bg-gradient-to-br from-slate-300 to-slate-200",
+                          bar: "bg-purple-200",
+                        },
+                        2: {
+                          height: "h-16",
+                          ring: "ring-amber-700/40",
+                          badge: "bg-gradient-to-br from-amber-700 to-amber-600",
+                          bar: "bg-purple-100",
+                        },
+                      }[i];
+
+                      return (
+                        <div key={i} className="flex w-24 flex-col items-center sm:w-28">
+                          <div
+                            className={`flex h-12 w-12 items-center justify-center rounded-full text-white shadow-md ring-4 ${podium.ring} ${podium.badge}`}
+                          >
+                            {i === 0 ? (
+                              <Crown className="h-6 w-6" />
+                            ) : (
+                              <Medal className="h-5 w-5" />
+                            )}
+                          </div>
+                          <p className="mt-2 w-full truncate text-center text-sm font-bold text-slate-800">
+                            {u.username}
+                          </p>
+                          {isMe && (
+                            <span className="mt-0.5 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase text-purple-600">
+                              You
+                            </span>
+                          )}
+                          <p className="mt-0.5 text-sm font-extrabold text-purple-600">
+                            {u.score} pts
+                          </p>
+                          <div
+                            className={`mt-2 flex w-full ${podium.height} items-start justify-center rounded-t-2xl ${podium.bar} pt-1.5`}
+                          >
+                            <span className="text-sm font-extrabold text-white">
+                              #{i + 1}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* Remaining ranks */}
+              <div className="space-y-2">
+                {leaderboard.slice(3).map((u, idx) => {
+                  const i = idx + 3;
+                  const isMe = u.username === username;
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 ${
+                        isMe
+                          ? "border-purple-200 bg-purple-50"
+                          : "border-purple-100 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-50 text-sm font-bold text-purple-600">
+                          #{i + 1}
+                        </span>
+                        <span className="text-sm font-semibold text-slate-800">
+                          {u.username}
+                          {isMe && (
+                            <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase text-purple-600">
+                              You
+                            </span>
+                          )}
+                        </span>
+                      </div>
+                      <span className="text-sm font-extrabold text-purple-600">
+                        {u.score} pts
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── ENDED (not yet marked completed by this client) ── */}
+          {status === "ended" && !contestCompleted && (
+            <div className="mt-8">
+              <div className="mb-4 flex items-center justify-center gap-2">
+                <Trophy className="h-5 w-5 text-amber-400" />
+                <h2 className="text-lg font-extrabold text-slate-900">Leaderboard</h2>
+              </div>
+
+              {leaderboard.length === 0 ? (
+                <p className="text-center text-sm text-slate-400">
+                  Waiting for leaderboard…
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {leaderboard.map((u, idx) => {
+                    const isMe = u.username === username;
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex items-center justify-between gap-3 rounded-2xl border px-4 py-3 ${
+                          idx === 0
+                            ? "border-amber-200 bg-gradient-to-r from-amber-50 to-purple-50"
+                            : isMe
+                            ? "border-purple-200 bg-purple-50"
+                            : "border-purple-100 bg-white"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-purple-50 text-sm font-bold text-purple-600">
+                            {idx === 0 ? (
+                              <Crown className="h-4 w-4 text-amber-500" />
+                            ) : idx === 1 ? (
+                              <Medal className="h-4 w-4 text-slate-400" />
+                            ) : idx === 2 ? (
+                              <Medal className="h-4 w-4 text-amber-700" />
+                            ) : (
+                              `#${idx + 1}`
+                            )}
+                          </span>
+                          <span className="text-sm font-semibold text-slate-800">
+                            {u.username}
+                            {isMe && (
+                              <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-bold uppercase text-purple-600">
+                                You
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <span className="text-sm font-extrabold text-purple-600">
+                          {u.score} pts
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

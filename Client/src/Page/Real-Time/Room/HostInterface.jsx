@@ -1,6 +1,5 @@
 import axios from "axios";
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Form } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 import {
@@ -10,6 +9,14 @@ import {
   Trash2,
   ChevronRight,
   ChevronLeft,
+  Trophy,
+  Crown,
+  Users,
+  CheckCircle2,
+  ListChecks,
+  Clock,
+  Award,
+  Rocket,
 } from "lucide-react";
 import { API_URL, SOCKET_URL } from "../../../config/backend.js";
 import { useAuth } from "../../../context/AuthContext.jsx";
@@ -258,195 +265,180 @@ function HostInterface() {
 
   // ---------- UI ----------
   return (
-    <div
-      className="min-h-screen px-4 py-8"
-      style={{ backgroundColor: "var(--bg-primary)", color: "var(--txt)" }}
-    >
+    <div className="min-h-screen w-full bg-white relative overflow-hidden px-4 py-8">
+      {/* Ambient background glows */}
+      <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-purple-200/60 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 -right-40 h-[28rem] w-[28rem] rounded-full bg-purple-100 blur-3xl" />
+
       {/* Toggle AI Sidebar Button - Top Right */}
       <div className="fixed top-4 right-4 z-50">
         <button
           onClick={() => setShowAISidebar(!showAISidebar)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all shadow-lg"
-          style={{
-            backgroundColor: showAISidebar ? "var(--btn-hover)" : "var(--btn)",
-            color: "white",
-          }}
+          className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-purple-200 transition active:scale-[0.98]"
         >
           <Sparkles size={18} />
           <span className="hidden sm:inline">AI Assistant</span>
-          {showAISidebar ? (
-            <ChevronRight size={18} />
-          ) : (
-            <ChevronLeft size={18} />
-          )}
+          {showAISidebar ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
         </button>
       </div>
 
       {/* Main Layout */}
-      <div className="flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto pt-16">
+      <div className="relative z-10 flex flex-col lg:flex-row gap-6 max-w-7xl mx-auto pt-16">
         {/* MAIN CONTENT */}
         <div
           className={`flex-1 transition-all duration-300 ${showAISidebar ? "lg:mr-96" : ""}`}
         >
-          <div
-            className="rounded-lg border p-6"
-            style={{
-              backgroundColor: "var(--bg-sec)",
-              borderColor: "rgba(var(--shadow-rgb),0.2)",
-            }}
-          >
-            <h1 className="text-center mb-3 text-2xl font-bold">
-              Room ID: {roomId}
-            </h1>
-            <h2
-              className="text-center mb-4 text-lg"
-              style={{ color: "var(--txt-dim)" }}
-            >
-              Host Panel
-            </h2>
+          <div className="rounded-3xl border border-purple-100 bg-white p-6 shadow-[0_10px_40px_-15px_rgba(124,58,237,0.25)] sm:p-8">
+            {/* HEADER */}
+            <div className="mb-6 flex flex-col items-center text-center">
+              <div className="mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-600 to-fuchsia-500 shadow-lg shadow-purple-200">
+                <Crown className="h-7 w-7 text-white" />
+              </div>
+              <span className="rounded-full bg-purple-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-purple-600">
+                Host Panel
+              </span>
+              <h1 className="mt-2 text-2xl font-extrabold text-slate-900">
+                Room ID: <span className="text-purple-600">{roomId}</span>
+              </h1>
+            </div>
 
             {/* ---------- ADD QUESTION FORM ---------- */}
-            <Form onSubmit={handleOnSubmit}>
-              <Form.Group className="mb-3">
-                <Form.Control
+            <div className="rounded-2xl border border-purple-100 bg-purple-50/30 p-4 sm:p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <ListChecks className="h-5 w-5 text-purple-500" />
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                  Add a Question
+                </h3>
+              </div>
+
+              <form onSubmit={handleOnSubmit} className="space-y-3">
+                <input
                   placeholder="Enter question"
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   required
-                  style={{
-                    backgroundColor: "var(--bg-ter)",
-                    color: "var(--txt)",
-                    borderColor: "rgba(var(--shadow-rgb),0.2)",
-                  }}
+                  className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
                 />
-              </Form.Group>
 
-              {options.map((option, index) => (
-                <div
-                  key={index}
-                  className="d-flex align-items-center gap-2 mb-2"
-                >
-                  <Form.Control
-                    placeholder={`Option ${index + 1}`}
-                    value={option}
-                    onChange={(e) => handleOption(index, e.target.value)}
-                    required
-                    style={{
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
-                  />
-                  <Form.Check
-                    type="radio"
-                    name="correctOption"
-                    checked={correctOptionIndex === index}
-                    onChange={() => setCorrectOptionIndex(index)}
-                    label="Correct"
-                    style={{ color: "var(--txt)" }}
-                  />
+                <div className="space-y-2">
+                  {options.map((option, index) => {
+                    const isCorrect = correctOptionIndex === index;
+                    return (
+                      <div key={index} className="flex items-center gap-2">
+                        <input
+                          placeholder={`Option ${index + 1}`}
+                          value={option}
+                          onChange={(e) => handleOption(index, e.target.value)}
+                          required
+                          className="flex-1 rounded-xl border border-purple-100 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setCorrectOptionIndex(index)}
+                          className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2.5 text-xs font-semibold transition ${
+                            isCorrect
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-600"
+                              : "border-purple-100 bg-white text-slate-400 hover:border-purple-200 hover:text-purple-500"
+                          }`}
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                          <span className="hidden sm:inline">Correct</span>
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
-              ))}
 
-              <div className="d-flex gap-3 mb-3 mt-3">
-                <Form.Group>
-                  <Form.Label>Marks</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={1}
-                    value={marks}
-                    onChange={(e) => setMarks(Number(e.target.value))}
-                    style={{
-                      width: "120px",
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
-                  />
-                </Form.Group>
+                <div className="flex flex-wrap gap-3 pt-1">
+                  <div className="flex-1 min-w-[120px]">
+                    <label className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                      <Award className="h-3.5 w-3.5" />
+                      Marks
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={marks}
+                      onChange={(e) => setMarks(Number(e.target.value))}
+                      className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                    />
+                  </div>
 
-                <Form.Group>
-                  <Form.Label>Time Limit (seconds)</Form.Label>
-                  <Form.Control
-                    type="number"
-                    min={5}
-                    max={300}
-                    value={timeLimit}
-                    onChange={(e) => setTimeLimit(Number(e.target.value))}
-                    style={{
-                      width: "150px",
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
-                  />
-                </Form.Group>
-              </div>
+                  <div className="flex-1 min-w-[140px]">
+                    <label className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-slate-400">
+                      <Clock className="h-3.5 w-3.5" />
+                      Time Limit (seconds)
+                    </label>
+                    <input
+                      type="number"
+                      min={5}
+                      max={300}
+                      value={timeLimit}
+                      onChange={(e) => setTimeLimit(Number(e.target.value))}
+                      className="w-full rounded-xl border border-purple-100 bg-white px-4 py-2.5 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:ring-2 focus:ring-purple-100"
+                    />
+                  </div>
+                </div>
 
-              <Button
-                type="submit"
-                style={{
-                  width: "100%",
-                  backgroundColor: "var(--btn)",
-                  border: "none",
-                  padding: "12px",
-                  fontWeight: "600",
-                }}
-              >
-                Add Question
-              </Button>
-            </Form>
+                <button
+                  type="submit"
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-purple-200 transition active:scale-[0.98]"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Question
+                </button>
+              </form>
+            </div>
 
             {/* ---------- DIVIDER ---------- */}
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(var(--shadow-rgb),0.2)",
-                margin: "2rem 0",
-              }}
-            />
+            <div className="my-6 h-px bg-purple-100" />
 
             {/* ---------- QUESTION LIST ---------- */}
-            <h4 className="mb-3">Added Questions ({questions.length})</h4>
+            <div className="mb-4 flex items-center justify-between">
+              <h4 className="flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">
+                <ListChecks className="h-4 w-4 text-purple-400" />
+                Added Questions ({questions.length})
+              </h4>
+            </div>
 
             {questions.length === 0 && (
-              <p style={{ opacity: 0.7 }}>No questions added yet.</p>
+              <div className="rounded-2xl border border-dashed border-purple-200 bg-purple-50/40 px-4 py-6 text-center">
+                <p className="text-sm text-slate-400">No questions added yet.</p>
+              </div>
             )}
 
             <div className="space-y-3">
               {questions.map((q, index) => (
                 <div
                   key={index}
-                  style={{
-                    background: "var(--bg-ter)",
-                    padding: "1.2rem",
-                    borderRadius: "12px",
-                    border: "1px solid rgba(var(--shadow-rgb),0.1)",
-                  }}
+                  className="rounded-2xl border border-purple-100 bg-purple-50/30 p-4"
                 >
-                  <h5 style={{ color: "var(--txt)" }}>
+                  <h5 className="text-sm font-bold text-slate-800">
                     {index + 1}. {q.questionText}
                   </h5>
 
-                  <ul className="mt-2">
+                  <ul className="mt-2 space-y-1">
                     {q.options.map((opt, i) => (
-                      <li key={i} style={{ color: "var(--txt-dim)" }}>
+                      <li
+                        key={i}
+                        className={`text-xs ${
+                          q.correctOptionIndex === i
+                            ? "font-semibold text-emerald-600"
+                            : "text-slate-500"
+                        }`}
+                      >
                         {opt.text}
                         {q.correctOptionIndex === i && " ✅"}
                       </li>
                     ))}
                   </ul>
 
-                  <div className="d-flex gap-3 mt-2">
-                    <span
-                      style={{ color: "var(--txt-dim)", fontSize: "0.9rem" }}
-                    >
-                      Marks: {q.marks}
+                  <div className="mt-2 flex gap-4 text-xs font-medium text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <Award className="h-3.5 w-3.5" /> {q.marks} pts
                     </span>
-                    <span
-                      style={{ color: "var(--txt-dim)", fontSize: "0.9rem" }}
-                    >
-                      Time: ⏱ {q.timeLimit}s
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3.5 w-3.5" /> {q.timeLimit}s
                     </span>
                   </div>
                 </div>
@@ -454,97 +446,75 @@ function HostInterface() {
             </div>
 
             {/* ---------- SUBMIT ALL ---------- */}
-            <Button
+            <button
               onClick={handleOnSubmitQuestion}
-              style={{
-                width: "100%",
-                marginTop: "1.5rem",
-                backgroundColor: "#2ecc71",
-                border: "none",
-                padding: "12px",
-                fontWeight: "600",
-              }}
+              className="mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-100 transition active:scale-[0.98]"
             >
+              <CheckCircle2 className="h-4 w-4" />
               Submit All Questions
-            </Button>
+            </button>
 
             {/* ---------- PLAYERS & START ---------- */}
-            <div
-              style={{
-                height: "1px",
-                background: "rgba(var(--shadow-rgb),0.2)",
-                margin: "2rem 0",
-              }}
-            />
+            <div className="my-6 h-px bg-purple-100" />
 
-            <h4 className="mb-3">Participants ({participants.length})</h4>
+            <h4 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">
+              <Users className="h-4 w-4 text-purple-400" />
+              Participants ({participants.length})
+            </h4>
 
             {participants.length === 0 && (
-              <p style={{ opacity: 0.7 }}>Waiting for players to join...</p>
+              <div className="rounded-2xl border border-dashed border-purple-200 bg-purple-50/40 px-4 py-6 text-center">
+                <p className="text-sm text-slate-400">Waiting for players to join…</p>
+              </div>
             )}
 
-            {participants.map((p, i) => (
-              <div
-                key={i}
-                style={{
-                  background: "var(--bg-ter)",
-                  padding: "0.9rem 1.2rem",
-                  borderRadius: "10px",
-                  marginBottom: "0.6rem",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <span>{p.username || "Anonymous"}</span>
-                <span style={{ opacity: 0.6, fontSize: "0.85rem" }}>
-                  {String(p.userId).slice(-6)}
-                </span>
-              </div>
-            ))}
+            <div className="space-y-2">
+              {participants.map((p, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between gap-3 rounded-2xl border border-purple-100 bg-purple-50/30 px-4 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-400 text-xs font-bold text-white">
+                      {(p.username || "?").charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-sm font-semibold text-slate-700">
+                      {p.username || "Anonymous"}
+                    </span>
+                  </div>
+                  <span className="text-xs font-medium text-slate-400">
+                    {String(p.userId).slice(-6)}
+                  </span>
+                </div>
+              ))}
+            </div>
 
-            <Button
+            <button
               onClick={handleStartContest}
-              style={{
-                width: "100%",
-                marginTop: "1rem",
-                backgroundColor: "#3498db",
-                border: "none",
-                padding: "12px",
-                fontWeight: "600",
-              }}
               disabled={questions.length === 0}
+              className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-bold text-white shadow-md shadow-purple-200 transition active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-40"
             >
+              <Rocket className="h-4 w-4" />
               Start Contest
-            </Button>
+            </button>
           </div>
         </div>
 
         {/* AI SIDEBAR */}
         {showAISidebar && (
           <div className="w-full lg:w-96 lg:fixed lg:right-0 lg:top-0 lg:h-screen lg:overflow-y-auto lg:pt-20 lg:pb-8 lg:px-4">
-            <div
-              className="rounded-lg border p-5 shadow-2xl"
-              style={{
-                backgroundColor: "var(--bg-sec)",
-                borderColor: "rgba(var(--shadow-rgb),0.3)",
-              }}
-            >
+            <div className="rounded-3xl border border-purple-100 bg-white p-5 shadow-[0_10px_40px_-15px_rgba(124,58,237,0.35)]">
               {/* AI Header */}
-              <div className="flex items-center justify-between mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles size={20} style={{ color: "var(--btn)" }} />
-                  <h3
-                    className="text-lg font-bold"
-                    style={{ color: "var(--txt)" }}
-                  >
+                  <Sparkles size={20} className="text-purple-500" />
+                  <h3 className="text-lg font-bold text-slate-900">
                     AI Question Generator
                   </h3>
                 </div>
                 <button
                   onClick={() => setShowAISidebar(false)}
-                  className="lg:hidden p-1 rounded hover:bg-opacity-10"
-                  style={{ color: "var(--txt-dim)" }}
+                  className="rounded p-1 text-slate-400 hover:bg-purple-50 lg:hidden"
                 >
                   <X size={20} />
                 </button>
@@ -554,11 +524,8 @@ function HostInterface() {
               <form onSubmit={handleAIGenerate} className="space-y-4">
                 {/* Topic */}
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: "var(--txt-dim)" }}
-                  >
-                    Topic / Title <span className="text-red-500">*</span>
+                  <label className="mb-1 block text-sm font-medium text-slate-500">
+                    Topic / Title <span className="text-rose-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -568,25 +535,15 @@ function HostInterface() {
                     }
                     placeholder="e.g. JavaScript Array Methods"
                     disabled={isGenerating}
-                    className="w-full px-3 py-2 rounded-md border text-sm focus:outline-none focus:ring-2"
-                    style={{
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
+                    className="w-full rounded-xl border border-purple-100 bg-purple-50/40 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100"
                   />
                 </div>
 
                 {/* Description */}
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-1"
-                    style={{ color: "var(--txt-dim)" }}
-                  >
+                  <label className="mb-1 block text-sm font-medium text-slate-500">
                     Description{" "}
-                    <span style={{ color: "var(--txt-disabled)" }}>
-                      (optional)
-                    </span>
+                    <span className="text-slate-300">(optional)</span>
                   </label>
                   <textarea
                     rows={3}
@@ -599,22 +556,14 @@ function HostInterface() {
                     }
                     placeholder="Extra context, syllabus focus, etc."
                     disabled={isGenerating}
-                    className="w-full px-3 py-2 rounded-md border text-sm resize-none focus:outline-none focus:ring-2"
-                    style={{
-                      backgroundColor: "var(--bg-ter)",
-                      color: "var(--txt)",
-                      borderColor: "rgba(var(--shadow-rgb),0.2)",
-                    }}
+                    className="w-full resize-none rounded-xl border border-purple-100 bg-purple-50/40 px-3 py-2 text-sm text-slate-800 outline-none transition focus:border-purple-400 focus:bg-white focus:ring-2 focus:ring-purple-100"
                   />
                 </div>
 
                 {/* Difficulty */}
                 <div>
-                  <label
-                    className="block text-sm font-medium mb-2"
-                    style={{ color: "var(--txt-dim)" }}
-                  >
-                    Difficulty Level <span className="text-red-500">*</span>
+                  <label className="mb-2 block text-sm font-medium text-slate-500">
+                    Difficulty Level <span className="text-rose-500">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {difficulties.map((level) => {
@@ -625,16 +574,11 @@ function HostInterface() {
                           type="button"
                           disabled={isGenerating}
                           onClick={() => handleDifficultyToggle(level)}
-                          className="px-3 py-2 rounded-md text-sm font-medium transition border"
-                          style={{
-                            backgroundColor: active
-                              ? "var(--btn)"
-                              : "var(--bg-ter)",
-                            color: active ? "white" : "var(--txt-dim)",
-                            borderColor: active
-                              ? "var(--btn)"
-                              : "rgba(var(--shadow-rgb),0.2)",
-                          }}
+                          className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${
+                            active
+                              ? "border-purple-500 bg-gradient-to-r from-purple-600 to-fuchsia-500 text-white"
+                              : "border-purple-100 bg-purple-50/40 text-slate-500"
+                          }`}
                         >
                           {level}
                         </button>
@@ -647,16 +591,11 @@ function HostInterface() {
                 <button
                   type="submit"
                   disabled={isGenerating}
-                  className="w-full px-4 py-3 rounded-md text-sm font-semibold flex items-center justify-center gap-2"
-                  style={{
-                    backgroundColor: "var(--btn)",
-                    color: "white",
-                    opacity: isGenerating ? 0.6 : 1,
-                  }}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-semibold text-white shadow-md shadow-purple-200 transition disabled:opacity-60"
                 >
                   {isGenerating ? (
                     <>
-                      <span className="animate-spin h-4 w-4 border-2 border-white/40 border-t-white rounded-full" />
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                       Generating...
                     </>
                   ) : (
@@ -671,43 +610,23 @@ function HostInterface() {
               {/* Generated Questions */}
               {generatedQuestions.length > 0 && (
                 <>
-                  <div
-                    style={{
-                      height: "1px",
-                      background: "rgba(var(--shadow-rgb),0.2)",
-                      margin: "1.5rem 0",
-                    }}
-                  />
+                  <div className="my-6 h-px bg-purple-100" />
 
-                  <h4
-                    className="text-sm font-semibold mb-3"
-                    style={{ color: "var(--txt)" }}
-                  >
+                  <h4 className="mb-3 text-sm font-bold text-slate-900">
                     Generated Questions ({generatedQuestions.length})
                   </h4>
 
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                  <div className="max-h-96 space-y-3 overflow-y-auto">
                     {generatedQuestions.map((q, index) => (
                       <div
                         key={index}
-                        style={{
-                          background: "var(--bg-ter)",
-                          padding: "1rem",
-                          borderRadius: "10px",
-                          border: "1px solid rgba(var(--shadow-rgb),0.1)",
-                        }}
+                        className="rounded-xl border border-purple-100 bg-purple-50/30 p-4"
                       >
-                        <p
-                          className="text-sm font-medium mb-2"
-                          style={{ color: "var(--txt)" }}
-                        >
+                        <p className="mb-2 text-sm font-medium text-slate-800">
                           {q.questionText}
                         </p>
 
-                        <ul
-                          className="text-xs mb-2"
-                          style={{ color: "var(--txt-dim)" }}
-                        >
+                        <ul className="mb-2 space-y-0.5 text-xs text-slate-500">
                           {q.options.map((opt, i) => (
                             <li key={i}>
                               {opt.text} {q.correctOptionIndex === i && "✅"}
@@ -716,34 +635,27 @@ function HostInterface() {
                         </ul>
 
                         <div className="flex items-center justify-between gap-2">
-                          <div
-                            className="flex gap-2 text-xs"
-                            style={{ color: "var(--txt-disabled)" }}
-                          >
-                            <span>Marks: {q.marks}</span>
-                            <span>⏱ {q.timeLimit}s</span>
+                          <div className="flex gap-3 text-xs text-slate-400">
+                            <span className="flex items-center gap-1">
+                              <Award className="h-3.5 w-3.5" /> {q.marks}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="h-3.5 w-3.5" /> {q.timeLimit}s
+                            </span>
                           </div>
 
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleAddAIQuestion(q)}
-                              className="p-1.5 rounded transition"
-                              style={{
-                                backgroundColor: "var(--btn)",
-                                color: "white",
-                              }}
                               title="Add to questions"
+                              className="rounded-lg bg-gradient-to-r from-purple-600 to-fuchsia-500 p-1.5 text-white transition active:scale-95"
                             >
                               <Plus size={16} />
                             </button>
                             <button
                               onClick={() => handleRemoveAIQuestion(q)}
-                              className="p-1.5 rounded transition"
-                              style={{
-                                backgroundColor: "#ef4444",
-                                color: "white",
-                              }}
                               title="Remove"
+                              className="rounded-lg bg-rose-500 p-1.5 text-white transition active:scale-95"
                             >
                               <Trash2 size={16} />
                             </button>

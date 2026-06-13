@@ -73,6 +73,8 @@ function App() {
             <Route path="/session" element={<Session />} />
             <Route path="/aboutus" element={<AboutUs />} />
             <Route path="/settings" element={<Settings />} />
+             <Route path="/realRoom/:userId" element={<Main />} />
+            <Route path="/room/:userId/:roomId" element={<Room />} />
           </Route>
 
           {/* ------ PROTECTED (NO SIDEBAR) ------ */}
@@ -94,8 +96,7 @@ function App() {
             <Route path="/studwait" element={<StudentWait />} />
 
             {/* Real-time rooms (Socket.IO) */}
-            <Route path="/realRoom/:userId" element={<Main />} />
-            <Route path="/room/:userId/:roomId" element={<Room />} />
+           
           </Route>
         </Routes>
       </Router>

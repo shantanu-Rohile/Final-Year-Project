@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { LogIn, Mail, Lock, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import LoginBackground from "../../assets/LoginBackground.jpeg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -45,13 +46,35 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: 'var(--bg-primary)' }}>
+    
+   <div
+  className="min-h-screen flex items-center justify-center p-4"
+  style={{
+    backgroundImage: `linear-gradient(
+      rgba(0,0,0,0.35),
+      rgba(0,0,0,0.35)
+    ), url(${LoginBackground})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  }}
+>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        {/* Header */}
+       
+
+        {/* Form */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="rounded-2xl p-8 shadow-2xl"
+          style={{ backgroundColor: 'var(--bg-sec)' }}
+        >
+           {/* Header */}
         <div className="text-center mb-8">
           <motion.div
             initial={{ scale: 0 }}
@@ -69,15 +92,7 @@ const Login = () => {
             Sign in to continue to Learning Journey
           </p>
         </div>
-
-        {/* Form */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl p-8 shadow-2xl"
-          style={{ backgroundColor: 'var(--bg-sec)' }}
-        >
+        
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (
