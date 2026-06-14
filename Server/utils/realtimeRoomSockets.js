@@ -50,22 +50,27 @@ export function registerRealtimeRoomSockets(io) {
 
         socket.join(roomId);
 
-        const idx = (room.participants || []).findIndex(
-          (p) => String(p.userId) === String(userId)
-        );
+        // FIX 1: Host is never added to participants — they manage the room only
+        const isHost = String(room.host) === String(userId);
 
-        if (idx >= 0) {
-          room.participants[idx].socketId = socket.id;
-          room.participants[idx].username = username || room.participants[idx].username;
-        } else {
-          room.participants.push({
-            userId,
-            username: username || "Anonymous",
-            socketId: socket.id,
-          });
+        if (!isHost) {
+          const idx = (room.participants || []).findIndex(
+            (p) => String(p.userId) === String(userId)
+          );
+
+          if (idx >= 0) {
+            room.participants[idx].socketId = socket.id;
+            room.participants[idx].username = username || room.participants[idx].username;
+          } else {
+            room.participants.push({
+              userId,
+              username: username || "Anonymous",
+              socketId: socket.id,
+            });
+          }
+
+          await room.save();
         }
-
-        await room.save();
 
         io.to(roomId).emit(
           "participants-updated",
@@ -75,9 +80,10 @@ export function registerRealtimeRoomSockets(io) {
           }))
         );
 
-        const participant = room.participants.find(
-          (p) => String(p.userId) === String(userId)
-        );
+        // Host gets no participant state (they have no questions to answer)
+        const participant = isHost
+          ? null
+          : room.participants.find((p) => String(p.userId) === String(userId));
 
         socket.emit("sync-state", {
           status: room.status,
@@ -119,17 +125,24 @@ export function registerRealtimeRoomSockets(io) {
           ...p.toObject?.() ?? p,
           completed: false,
           currentQuestionIndex: 0,
-          currentQuestionStartedAt: now, // ✅ server stamps the start time
+          currentQuestionStartedAt: now,
         }));
 
         await room.save();
 
+        // FIX 2: Broadcast contest-started first so clients know to go live
         io.to(roomId).emit("contest-started");
         io.to(roomId).emit("leaderboard-data", leaderboardFromRoom(room));
 
+        // FIX 2: Send each participant their personal state (question index + startedAt)
+        // so the timer and first question load immediately without a refresh
         for (const p of room.participants) {
           if (p.socketId) {
-            io.to(p.socketId).emit("your-state", p);
+            io.to(p.socketId).emit("your-state", {
+              currentQuestionIndex: p.currentQuestionIndex,
+              currentQuestionStartedAt: p.currentQuestionStartedAt,
+              completed: p.completed,
+            });
           }
         }
 
@@ -168,65 +181,62 @@ export function registerRealtimeRoomSockets(io) {
         );
         if (!q) return;
 
-        // ✅ STEP 1: Calculate timeSpent using server timestamps BEFORE anything else
-        // currentQuestionStartedAt was set by the server when the question began
-        // So timeSpent = now - that timestamp = exact seconds the user took
         const now = Date.now();
         const timeSpent = participant.currentQuestionStartedAt
-          ? Math.min(                                                    // cap at timeLimit so no negative bonus
+          ? Math.min(
               (now - new Date(participant.currentQuestionStartedAt).getTime()) / 1000,
               q.timeLimit || 30
             )
-          : (q.timeLimit || 30);  // if somehow null, assume they used full time (0 bonus)
+          : (q.timeLimit || 30);
 
-        // ✅ STEP 2: Check correctness
         const isCorrect =
           selectedOption !== null && selectedOption !== undefined
             ? Number(selectedOption) === Number(q.correctOptionIndex)
             : false;
 
-        // ✅ STEP 3: Calculate points using the shared formula
-        // Same formula as static contest: base(difficulty) + timeBonus
         const pointsEarned = calculatePoints(q.difficulty, timeSpent, isCorrect);
 
-        // ✅ STEP 4: Push answer WITH timeSpent and pointsEarned stored
         participant.answers.push({
           questionId: q._id,
           selectedOption: selectedOption === null ? null : Number(selectedOption),
           isCorrect,
-          timeSpent: Math.round(timeSpent),  // stored for analytics/review
-          pointsEarned,                       // stored for per-question breakdown
+          timeSpent: Math.round(timeSpent),
+          pointsEarned,
         });
 
-        // ✅ STEP 5: Add points to total score
         if (isCorrect) {
           participant.score = (participant.score || 0) + pointsEarned;
         }
 
-        // ✅ STEP 6: Advance to next question — update startedAt for the NEXT question
         const nextIndex = (participant.currentQuestionIndex ?? 0) + 1;
 
         if (nextIndex >= (room.questions || []).length) {
           participant.completed = true;
           participant.currentQuestionIndex = nextIndex;
-          participant.currentQuestionStartedAt = null; // no next question
+          participant.currentQuestionStartedAt = null;
         } else {
           participant.currentQuestionIndex = nextIndex;
-          participant.currentQuestionStartedAt = new Date(); // ✅ fresh timestamp for next question
+          participant.currentQuestionStartedAt = new Date();
         }
 
         await room.save();
 
-        // Send updated personal state back to this participant
-        io.to(socket.id).emit("your-state", participant);
+        io.to(socket.id).emit("your-state", {
+          currentQuestionIndex: participant.currentQuestionIndex,
+          currentQuestionStartedAt: participant.currentQuestionStartedAt,
+          completed: participant.completed,
+        });
 
-        // Broadcast updated leaderboard to everyone in the room
         io.to(roomId).emit("leaderboard-data", leaderboardFromRoom(room));
 
-        // Check if all participants are done
+        // FIX 3: Exclude the host from the allDone check — only real participants matter
+        const nonHostParticipants = (room.participants || []).filter(
+          (p) => String(p.userId) !== String(room.host)
+        );
+
         const allDone =
-          (room.participants || []).length > 0 &&
-          (room.participants || []).every((p) => p.completed);
+          nonHostParticipants.length > 0 &&
+          nonHostParticipants.every((p) => p.completed);
 
         if (allDone) {
           room.status = "ended";

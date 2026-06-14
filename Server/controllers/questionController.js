@@ -5,7 +5,6 @@ export const generateQuestions = async (req, res) => {
   try {
     const { title, description, difficulty } = req.body;
 
-    // Validation
     if (!title || !difficulty || difficulty.length === 0) {
       return res.status(400).json({
         success: false,
@@ -13,21 +12,37 @@ export const generateQuestions = async (req, res) => {
       });
     }
 
-    // Create prompt for Gemini
+    const difficultyGuidelines = difficulty.map((d) => {
+      switch (d.toLowerCase()) {
+        case "easy":
+          return "Easy: basic recall, simple vocabulary, obvious answers, suitable for beginners";
+        case "medium":
+          return "Medium: requires understanding and some inference, moderate complexity";
+        case "hard":
+          return "Hard: deep knowledge, nuanced distinctions, tricky distractors, expert-level";
+        default:
+          return `${d}: standard complexity`;
+      }
+    }).join("\n");
+
     const prompt = `You are a quiz question generator.
 
 Generate ONLY MCQ and TRUE/FALSE questions.
 
 Topic: ${title}
 Description: ${description || "N/A"}
-Difficulty levels: ${difficulty.join(", ")}
+Requested difficulty levels: ${difficulty.join(", ")}
+
+Difficulty guidelines (follow these strictly):
+${difficultyGuidelines}
 
 Rules:
-- Generate at least 6-10 questions
-- Difficulty must strictly match the requested levels: ${difficulty.join(", ")}
-- MCQ must have exactly 4 options
-- TRUE/FALSE must have answer "True" or "False"
-- Each question must include: type, difficulty, question, options (if MCQ), correctAnswer
+- Generate at least 6-10 questions total, distributed across the requested difficulty levels.
+- EVERY question MUST have a "difficulty" field set to exactly one of: ${difficulty.join(", ")}
+- The question content and answer choices MUST match the difficulty level described above.
+- MCQ must have exactly 4 options.
+- TRUE/FALSE must have correctAnswer "True" or "False".
+- Each question must include: type, difficulty, question, options (if MCQ), correctAnswer.
 
 Return ONLY a valid JSON array with no explanation or additional text.
 
@@ -35,37 +50,28 @@ Example format:
 [
   {
     "type": "MCQ",
-    "difficulty": "Easy",
+    "difficulty": "${difficulty[0]}",
     "question": "Your question here?",
     "options": ["Option A", "Option B", "Option C", "Option D"],
     "correctAnswer": "Option A"
   },
   {
     "type": "TRUE/FALSE",
-    "difficulty": "Medium",
+    "difficulty": "${difficulty[difficulty.length - 1]}",
     "question": "Your true/false question?",
     "correctAnswer": "True"
   }
 ]`;
 
-    // Call Gemini API
     const rawResponse = await main(prompt);
-    // console.log('Raw Gemini Response:', rawResponse);
-
-    // Clean and parse response
     const questions = cleanGeminiResponse(rawResponse);
 
-    console.log(
-      `✅ Generated ${questions.length} questions for topic: ${title}`,
-    );
+    console.log(`✅ Generated ${questions.length} questions for topic: ${title}, difficulties: ${difficulty.join(", ")}`);
 
     res.json({ success: true, questions });
   } catch (error) {
     console.error("❌ Error generating questions:", error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
@@ -73,7 +79,6 @@ export const asyncgenerateQuestions = async (req, res) => {
   try {
     const { title, description, difficulty } = req.body;
 
-    // Validation
     if (!title || !difficulty || difficulty.length === 0) {
       return res.status(400).json({
         success: false,
@@ -81,56 +86,91 @@ export const asyncgenerateQuestions = async (req, res) => {
       });
     }
 
-    // Create prompt for Gemini tailored to the new Mongoose Schema
+    // Build per-difficulty guidelines for marks, timeLimit, and question style
+    const difficultyGuidelines = difficulty.map((d) => {
+      switch (d.toLowerCase()) {
+        case "easy":
+          return `Easy:
+  - Question style: basic recall, simple vocabulary, obvious answers, suitable for beginners
+  - marks: 1
+  - timeLimit: 20 (seconds)`;
+        case "medium":
+          return `Medium:
+  - Question style: requires understanding and some inference, moderate complexity
+  - marks: 2
+  - timeLimit: 35 (seconds)`;
+        case "hard":
+          return `Hard:
+  - Question style: deep knowledge, nuanced distinctions, tricky distractors, expert-level
+  - marks: 3
+  - timeLimit: 50 (seconds)`;
+        default:
+          return `${d}:
+  - Question style: standard complexity
+  - marks: 2
+  - timeLimit: 30 (seconds)`;
+      }
+    }).join("\n");
+
     const prompt = `You are a quiz question generator.
 
-Generate ONLY Multiple Choice Questions (MCQs). Do NOT generate standard 2-option True/False questions.
+Generate ONLY Multiple Choice Questions (MCQs). Do NOT generate True/False questions.
 
 Topic: ${title}
 Description: ${description || "N/A"}
-Difficulty levels: ${difficulty.join(", ")}
+Requested difficulty levels: ${difficulty.join(", ")}
+
+Difficulty guidelines (follow these STRICTLY for every question):
+${difficultyGuidelines}
 
 Rules:
-- Generate at least 6-10 questions.
-- Difficulty must match the requested levels: ${difficulty.join(", ")}.
-- EVERY question must have EXACTLY 4 options. 
-- Assign a reasonable 'marks' value (e.g., 1 for Easy, 2 for Medium, 3 for Hard).
-- Assign a reasonable 'timeLimit' in seconds (between 5 and 300, e.g., 30 for Easy, 45 for Hard).
-- 'correctOptionIndex' must be an integer from 0 to 3.
+- Generate at least 6-10 questions total, distributed evenly across the requested difficulty levels.
+- EVERY question MUST have a "difficulty" field set to exactly one of: ${difficulty.join(", ")}
+- The question content, distractors, and complexity MUST match the difficulty guidelines above.
+- EVERY question must have EXACTLY 4 options.
+- 'correctOptionIndex' must be an integer from 0 to 3 indicating the correct option.
+- 'marks' and 'timeLimit' must follow the difficulty guidelines above.
 
-Return ONLY a valid JSON array with no explanation, markdown formatting, or additional text. 
+Return ONLY a valid JSON array with no explanation, markdown formatting, or additional text.
 
-Example exact format:
+Example exact format (if "easy" and "hard" were requested):
 [
   {
-    "questionText": "What is the capital of France?",
+    "questionText": "What is 2 + 2?",
+    "difficulty": "easy",
     "options": [
-      { "text": "London" },
-      { "text": "Berlin" },
-      { "text": "Paris" },
-      { "text": "Madrid" }
+      { "text": "3" },
+      { "text": "4" },
+      { "text": "5" },
+      { "text": "6" }
+    ],
+    "correctOptionIndex": 1,
+    "marks": 1,
+    "timeLimit": 20
+  },
+  {
+    "questionText": "Which sorting algorithm has the best average-case time complexity?",
+    "difficulty": "hard",
+    "options": [
+      { "text": "Bubble Sort" },
+      { "text": "Insertion Sort" },
+      { "text": "Merge Sort" },
+      { "text": "Selection Sort" }
     ],
     "correctOptionIndex": 2,
-    "marks": 1,
-    "timeLimit": 30
+    "marks": 3,
+    "timeLimit": 50
   }
 ]`;
 
-    // Call Gemini API (Assuming `main` is your Gemini fetching function)
     const rawResponse = await main(prompt);
-
     const questions = cleanAsyncGeminiResponse(rawResponse);
 
-    console.log(
-      `✅ Generated ${questions.length} schema-compliant questions for topic: ${title}`,
-    );
+    console.log(`✅ Generated ${questions.length} schema-compliant questions for topic: ${title}, difficulties: ${difficulty.join(", ")}`);
 
     res.json({ success: true, questions });
   } catch (error) {
     console.error("❌ Error generating async questions:", error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };

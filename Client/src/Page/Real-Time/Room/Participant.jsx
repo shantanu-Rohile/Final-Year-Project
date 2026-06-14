@@ -11,7 +11,6 @@ import { useAuth } from "../../../context/AuthContext.jsx";
 const OPTION_LETTERS = ["A", "B", "C", "D", "E", "F"];
 
 const styles = `
-  /* ── entrance animations ── */
   @keyframes questionSlideIn {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -32,8 +31,6 @@ const styles = `
     from { opacity: 0; transform: translateX(-12px); }
     to   { opacity: 1; transform: translateX(0); }
   }
-
-  /* ── podium bar grows UP from zero ── */
   @keyframes podiumGrow {
     from { height: 0; opacity: 0; }
     to   { opacity: 1; }
@@ -42,16 +39,12 @@ const styles = `
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-
-  /* ── answer pop: scale burst on lock-in ── */
   @keyframes answerPop {
     0%   { transform: scale(1); }
     40%  { transform: scale(1.04); }
     70%  { transform: scale(0.98); }
     100% { transform: scale(1.01); }
   }
-
-  /* ── timer shake when ≤5s ── */
   @keyframes timerShake {
     0%, 100% { transform: translateX(0); }
     20%       { transform: translateX(-3px); }
@@ -59,33 +52,23 @@ const styles = `
     60%       { transform: translateX(-2px); }
     80%       { transform: translateX(2px); }
   }
-
-  /* ── timer pulse glow on urgent ── */
   @keyframes timerPulse {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0.5; }
   }
-
-  /* ── crown glow for #1 on final board ── */
   @keyframes crownGlow {
     0%, 100% { filter: drop-shadow(0 0 4px rgba(251,191,36,0.5)); transform: scale(1); }
     50%       { filter: drop-shadow(0 0 10px rgba(251,191,36,0.9)); transform: scale(1.12); }
   }
-
-  /* ── score tick: brief highlight flash ── */
   @keyframes scoreFlash {
     0%   { color: var(--accent); transform: scale(1); }
     30%  { color: #f59e0b; transform: scale(1.2); }
     100% { color: var(--accent); transform: scale(1); }
   }
-
-  /* ── waiting dot breathe ── */
   @keyframes breathe {
     0%, 100% { transform: scale(1); opacity: 0.9; }
     50%       { transform: scale(1.35); opacity: 0.4; }
   }
-
-  /* ── trophy bounce on leaderboard title ── */
   @keyframes trophyBounce {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     25%       { transform: translateY(-5px) rotate(-8deg); }
@@ -97,17 +80,13 @@ const styles = `
   .fade-in         { animation: fadeIn 0.35s ease forwards; }
   .scale-in        { animation: scaleIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
   .row-slide-in    { animation: rowSlideIn 0.35s ease forwards; }
-
   .answer-pop      { animation: answerPop 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
   .crown-glow      { animation: crownGlow 2s ease-in-out infinite; }
   .trophy-bounce   { animation: trophyBounce 2.5s ease-in-out infinite; }
   .score-flash     { animation: scoreFlash 0.5s ease forwards; }
-
   .timer-urgent    { animation: timerShake 0.4s ease, timerPulse 0.8s ease infinite; }
-
   .breathing-dot   { animation: breathe 1.6s ease-in-out infinite; }
 
-  /* staggered rows */
   .stagger > *:nth-child(1)    { animation-delay: 0.04s; opacity: 0; }
   .stagger > *:nth-child(2)    { animation-delay: 0.09s; opacity: 0; }
   .stagger > *:nth-child(3)    { animation-delay: 0.14s; opacity: 0; }
@@ -116,7 +95,6 @@ const styles = `
   .stagger > *:nth-child(6)    { animation-delay: 0.29s; opacity: 0; }
   .stagger > *:nth-child(n+7)  { animation-delay: 0.34s; opacity: 0; }
 
-  /* podium bar height transition */
   .podium-bar {
     transition: height 0.9s cubic-bezier(0.22, 1, 0.36, 1);
     animation: podiumFadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
@@ -124,14 +102,11 @@ const styles = `
   .podium-meta {
     animation: podiumFadeUp 0.5s cubic-bezier(0.22,1,0.36,1) forwards;
   }
-
-  /* progress bar glow when urgent */
   .bar-urgent {
     box-shadow: 0 0 8px 2px rgba(248, 113, 113, 0.6);
   }
 `;
 
-/* ── Animated score that counts up when value changes ── */
 function AnimatedScore({ value, className }) {
   const [display, setDisplay] = useState(value);
   const [flash, setFlash]     = useState(false);
@@ -142,7 +117,6 @@ function AnimatedScore({ value, className }) {
     const from = prevRef.current;
     const to   = value;
     prevRef.current = to;
-
     setFlash(true);
     const steps = 12;
     let step = 0;
@@ -177,7 +151,7 @@ function Participant() {
 
   const [answeredQuestions, setAnsweredQuestions]       = useState(new Set());
   const [selectedByQuestionId, setSelectedByQuestionId] = useState({});
-  const [justAnsweredId, setJustAnsweredId]             = useState(null); // for pop animation
+  const [justAnsweredId, setJustAnsweredId]             = useState(null);
 
   const [timeLeft, setTimeLeft]                         = useState(0);
   const [contestCompleted, setContestCompleted]         = useState(false);
@@ -189,7 +163,9 @@ function Participant() {
   const finishedRef = useRef(false);
 
   const effectiveUserId = user?.id || userId;
-  const isHost          = hostId && String(hostId) === String(effectiveUserId);
+
+  // Derive isHost from fetched hostId — stable reference
+  const isHost = hostId && String(hostId) === String(effectiveUserId);
 
   /* ── FETCH ── */
   useEffect(() => {
@@ -217,6 +193,7 @@ function Participant() {
     socketRef.current.on("sync-state", (s) => {
       if (!s) return;
       if (s.status) setStatus(s.status);
+      // sync-state carries participant data only on initial join, not after start-contest
       if (s.participant) {
         if (typeof s.participant.currentQuestionIndex === "number")
           setCurrentQuestionIndex(s.participant.currentQuestionIndex);
@@ -226,16 +203,28 @@ function Participant() {
       }
     });
 
-    socketRef.current.on("contest-started", () => setStatus("live"));
+    // FIX: contest-started just flips status to "live".
+    // The actual question state arrives via "your-state" sent right after by the server.
+    socketRef.current.on("contest-started", () => {
+      setStatus("live");
+    });
 
+    // FIX: your-state now always carries currentQuestionIndex + currentQuestionStartedAt,
+    // so the first question loads immediately without a refresh.
     socketRef.current.on("your-state", (p) => {
       if (!p) return;
-      if (typeof p.currentQuestionIndex === "number") setCurrentQuestionIndex(p.currentQuestionIndex);
-      if (p.currentQuestionStartedAt) setQuestionStartedAt(new Date(p.currentQuestionStartedAt));
+      if (typeof p.currentQuestionIndex === "number")
+        setCurrentQuestionIndex(p.currentQuestionIndex);
+      if (p.currentQuestionStartedAt)
+        setQuestionStartedAt(new Date(p.currentQuestionStartedAt));
       if (p.completed) setContestCompleted(true);
     });
 
-    socketRef.current.on("contest-ended", () => { setStatus("ended"); finishContest(); });
+    socketRef.current.on("contest-ended", () => {
+      setStatus("ended");
+      finishContest();
+    });
+
     socketRef.current.on("leaderboard-data", (data) => setLeaderboard(data || []));
 
     return () => socketRef.current?.disconnect();
@@ -318,7 +307,6 @@ function Participant() {
     : 0;
   const isUrgent = timeLeft > 0 && timeLeft <= 5;
 
-  /* ── Reusable leaderboard row ── */
   const LeaderboardRow = ({ u, idx, delay = 0 }) => {
     const isMe  = u.username === username;
     const isTop = idx === 0;
@@ -352,7 +340,6 @@ function Participant() {
     );
   };
 
-  /* ── Podium config ── */
   const podiumConfig = {
     0: { heightPx: 128, ring: "ring-amber-400/60", badge: "bg-gradient-to-br from-amber-400 to-amber-300", bar: "bg-[var(--btn)]",  delay: "0.05s" },
     1: { heightPx: 96,  ring: "ring-slate-400/50",  badge: "bg-gradient-to-br from-slate-400 to-slate-300",  bar: "bg-slate-500",    delay: "0.2s"  },
@@ -364,16 +351,13 @@ function Participant() {
     <div className="min-h-screen w-full bg-[var(--bg-primary)] relative overflow-hidden transition-colors duration-300">
       <style>{styles}</style>
 
-      {/* Ambient blobs */}
       <div className="pointer-events-none absolute -top-32 -left-32 h-96 w-96 rounded-full bg-[var(--accent)]/20 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 -right-40 h-[28rem] w-[28rem] rounded-full bg-[var(--accent)]/10 blur-3xl" />
 
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-10">
-        <div className={`scale-in w-full rounded-3xl border border-[color:rgba(var(--shadow-rgb),0.15)] bg-[var(--bg-sec)] p-6 shadow-[0_10px_40px_-15px_rgba(var(--shadow-rgb),0.25)] sm:p-8 ${
-          status === "live" && !contestCompleted ? "max-w-5xl" : "max-w-2xl"
-        }`}>
+        <div className="scale-in w-full max-w-2xl rounded-3xl border border-[color:rgba(var(--shadow-rgb),0.15)] bg-[var(--bg-sec)] p-6 shadow-[0_10px_40px_-15px_rgba(var(--shadow-rgb),0.25)] sm:p-8">
 
-          {/* ── Header ── */}
+          {/* Header */}
           <div className="fade-in flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--btn)] text-sm font-bold text-white shadow-md">
@@ -388,12 +372,12 @@ function Participant() {
                 )}
               </div>
             </div>
-              <span className="inline-flex font-semibold-3 items-center gap-1 text-xs font-semibold text-[var(--txt)]">
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-[var(--txt)]">
               {status === "live" ? "Live" : status === "ended" ? "Ended" : "Waiting"}
             </span>
           </div>
 
-          {/* ── WAITING — HOST ── */}
+          {/* WAITING — HOST */}
           {status === "waiting" && isHost && (
             <div className="fade-in-up mt-8 flex flex-col items-center gap-4 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--btn)] shadow-lg">
@@ -413,7 +397,32 @@ function Participant() {
             </div>
           )}
 
-          {/* ── WAITING — PLAYER ── */}
+          {/* WAITING — HOST (live — show a monitor view instead of questions) */}
+          {status === "live" && isHost && (
+            <div className="fade-in-up mt-8 flex flex-col items-center gap-4 text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--btn)] shadow-lg">
+                <Trophy className="h-7 w-7 text-white" />
+              </div>
+              <p className="text-sm font-semibold text-[var(--txt-dim)]">
+                Contest is live. Watching participants…
+              </p>
+              {leaderboard.length > 0 && (
+                <div className="w-full mt-2 space-y-2">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Trophy className="h-4 w-4 text-amber-400 trophy-bounce" />
+                    <h2 className="text-sm font-extrabold text-[var(--txt)]">Live Leaderboard</h2>
+                  </div>
+                  <div className="stagger space-y-2">
+                    {leaderboard.map((u, idx) => (
+                      <LeaderboardRow key={u.username} u={u} idx={idx} delay={idx * 0.05} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* WAITING — PLAYER */}
           {status === "waiting" && !isHost && (
             <div className="fade-in-up mt-8 flex flex-col items-center gap-3 text-center">
               <span className="relative flex h-4 w-4">
@@ -424,14 +433,11 @@ function Participant() {
             </div>
           )}
 
-          {/* ── LIVE ── */}
-          {status === "live" && !contestCompleted && (
-            <div className="mt-6 grid grid-cols-1 md:grid-cols-[1fr_300px] gap-6 items-start">
-
-              {/* LEFT: Active Question */}
+          {/* LIVE — PLAYER ONLY */}
+          {status === "live" && !isHost && !contestCompleted && (
+            <div className="mt-6">
               {currentQuestion ? (
                 <div key={currentQuestionIndex} className="question-enter">
-
                   {/* Timer row */}
                   <div className="mb-5 flex items-center gap-3">
                     <div className={`flex h-10 w-10 items-center justify-center rounded-full bg-[var(--bg-ter)] transition-colors duration-300 ${isUrgent ? "bg-rose-100/60" : ""}`}>
@@ -440,9 +446,8 @@ function Participant() {
                     <div className="flex-1">
                       <div className="mb-1 flex items-center justify-between text-xs font-semibold text-[var(--txt-disabled)]">
                         <span>Question {currentQuestionIndex + 1} of {questions.length}</span>
-                        {/* Timer number — shakes when urgent */}
                         <span
-                          key={timeLeft} /* re-mount each second to re-trigger shake */
+                          key={timeLeft}
                           className={`tabular-nums font-extrabold transition-colors duration-300 ${
                             isUrgent ? "text-rose-500 timer-urgent" : "text-[var(--accent)]"
                           }`}
@@ -472,8 +477,8 @@ function Participant() {
                   {/* Options */}
                   <div className="stagger space-y-2.5">
                     {currentQuestion.options.map((opt, i) => {
-                      const selected  = selectedByQuestionId[currentQuestionId] === i;
-                      const disabled  = alreadyAnswered || timeLeft <= 0;
+                      const selected    = selectedByQuestionId[currentQuestionId] === i;
+                      const disabled    = alreadyAnswered || timeLeft <= 0;
                       const justThisOne = selected && justAnsweredId === currentQuestionId;
 
                       return (
@@ -515,27 +520,10 @@ function Participant() {
                   <p className="text-sm font-semibold text-[var(--txt-dim)]">Loading your first question…</p>
                 </div>
               )}
-
-              {/* RIGHT: Live Leaderboard */}
-              <div className="fade-in rounded-2xl border border-[color:rgba(var(--shadow-rgb),0.15)] bg-[var(--bg-ter)]/40 p-4">
-                <div className="mb-4 flex items-center gap-2">
-                  <Trophy className="h-4 w-4 text-amber-400 trophy-bounce" />
-                  <h2 className="text-sm font-extrabold text-[var(--txt)]">Live Leaderboard</h2>
-                </div>
-                {leaderboard.length === 0 ? (
-                  <p className="text-center text-xs text-[var(--txt-disabled)] py-4">Waiting for scores…</p>
-                ) : (
-                  <div className="stagger space-y-2">
-                    {leaderboard.map((u, idx) => (
-                      <LeaderboardRow key={u.username} u={u} idx={idx} delay={idx * 0.05} />
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           )}
 
-          {/* ── COMPLETED: Final Leaderboard ── */}
+          {/* COMPLETED: Final Leaderboard */}
           {contestCompleted && (
             <div className="mt-8 fade-in">
               <div className="mb-6 flex items-center justify-center gap-2">
@@ -549,57 +537,34 @@ function Participant() {
 
               {leaderboard.length > 0 && (
                 <>
-                  {/* Podium — bars grow upward */}
                   <div className="mb-8 flex items-end justify-center gap-4 sm:gap-6">
                     {[1, 0, 2].filter((i) => leaderboard[i]).map((i) => {
-                      const u   = leaderboard[i];
+                      const u    = leaderboard[i];
                       const isMe = u.username === username;
                       const cfg  = podiumConfig[i];
 
                       return (
                         <div key={i} className="flex flex-col items-center w-24 sm:w-28">
-                          {/* Avatar badge */}
                           <div
                             className={`podium-meta flex h-12 w-12 items-center justify-center rounded-full text-white shadow-lg ring-4 ${cfg.ring} ${cfg.badge} ${i === 0 ? "crown-glow" : ""}`}
                             style={{ animationDelay: cfg.delay }}
                           >
                             {i === 0 ? <Crown className="h-6 w-6" /> : <Medal className="h-5 w-5" />}
                           </div>
-
-                          {/* Name */}
-                          <p
-                            className="podium-meta mt-2 w-full truncate text-center text-sm font-bold text-[var(--txt)]"
-                            style={{ animationDelay: cfg.delay }}
-                          >
+                          <p className="podium-meta mt-2 w-full truncate text-center text-sm font-bold text-[var(--txt)]" style={{ animationDelay: cfg.delay }}>
                             {u.username}
                           </p>
-
-                          {/* YOU badge */}
                           {isMe && (
-                            <span
-                              className="podium-meta mt-0.5 rounded-full bg-[var(--btn)] px-2 py-0.5 text-[10px] font-bold uppercase text-white"
-                              style={{ animationDelay: cfg.delay }}
-                            >
+                            <span className="podium-meta mt-0.5 rounded-full bg-[var(--btn)] px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ animationDelay: cfg.delay }}>
                               You
                             </span>
                           )}
-
-                          {/* Score */}
-                          <p
-                            className="podium-meta mt-0.5 text-sm font-extrabold text-[var(--txt)]"
-                            style={{ animationDelay: cfg.delay }}
-                          >
+                          <p className="podium-meta mt-0.5 text-sm font-extrabold text-[var(--txt)]" style={{ animationDelay: cfg.delay }}>
                             {u.score} pts
                           </p>
-
-                          {/* Bar — grows from 0 to target height */}
                           <div
                             className={`podium-bar mt-2 w-full flex items-start justify-center rounded-t-2xl ${cfg.bar} pt-2 overflow-hidden`}
-                            style={{
-                              height: podiumReady ? `${cfg.heightPx}px` : "0px",
-                              animationDelay: cfg.delay,
-                              transitionDelay: cfg.delay,
-                            }}
+                            style={{ height: podiumReady ? `${cfg.heightPx}px` : "0px", animationDelay: cfg.delay, transitionDelay: cfg.delay }}
                           >
                             <span className="text-sm font-extrabold text-white">#{i + 1}</span>
                           </div>
@@ -608,7 +573,6 @@ function Participant() {
                     })}
                   </div>
 
-                  {/* Remaining ranks */}
                   <div className="stagger space-y-2">
                     {leaderboard.slice(3).map((u, idx) => {
                       const i    = idx + 3;
@@ -653,7 +617,7 @@ function Participant() {
             </div>
           )}
 
-          {/* ── ENDED (not yet completed by this client) ── */}
+          {/* ENDED (not yet completed by this client) */}
           {status === "ended" && !contestCompleted && (
             <div className="mt-8 fade-in">
               <div className="mb-4 flex items-center justify-center gap-2">
