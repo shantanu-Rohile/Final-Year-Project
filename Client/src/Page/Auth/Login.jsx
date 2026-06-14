@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { LogIn, Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import LoginBackground from "../../assets/LoginBackground.jpeg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -47,35 +48,21 @@ const Login = () => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: "var(--bg-primary)" }}
+      style={{
+        backgroundImage: `linear-gradient(
+      rgba(0,0,0,0.35),
+      rgba(0,0,0,0.35)
+    ), url(${LoginBackground})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-            style={{ backgroundColor: "var(--btn)" }}
-          >
-            <LogIn className="w-8 h-8 text-white" />
-          </motion.div>
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{ color: "var(--txt)" }}
-          >
-            Welcome Back
-          </h1>
-          <p style={{ color: "var(--txt-dim)" }}>
-            Sign in to continue to Learning Journey
-          </p>
-        </div>
-
         {/* Form */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -84,6 +71,28 @@ const Login = () => {
           className="rounded-2xl p-8 shadow-2xl"
           style={{ backgroundColor: "var(--bg-sec)" }}
         >
+          {/* Header */}
+          <div className="text-center mb-8">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+              style={{ backgroundColor: "var(--btn)" }}
+            >
+              <LogIn className="w-8 h-8 text-white" />
+            </motion.div>
+            <h1
+              className="text-3xl font-bold mb-2"
+              style={{ color: "var(--txt)" }}
+            >
+              Welcome Back
+            </h1>
+            <p style={{ color: "var(--txt-dim)" }}>
+              Sign in to continue to Learning Journey
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Error Message */}
             {error && (

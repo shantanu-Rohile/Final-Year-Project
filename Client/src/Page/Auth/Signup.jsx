@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { UserPlus, User, Mail, Lock, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext.jsx";
+import LoginBackground from "../../assets/LoginBackground.jpeg";
 
 const Signup = () => {
   const navigate = useNavigate();
@@ -65,33 +66,21 @@ const Signup = () => {
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4"
-      style={{ backgroundColor: "var(--bg-primary)" }}
+      style={{
+        backgroundImage: `linear-gradient(
+         rgba(0,0,0,0.35),
+         rgba(0,0,0,0.35)
+       ), url(${LoginBackground})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
     >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
-            style={{ backgroundColor: "var(--btn)" }}
-          >
-            <UserPlus className="w-8 h-8 text-white" />
-          </motion.div>
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{ color: "var(--txt)" }}
-          >
-            Create Account
-          </h1>
-          <p style={{ color: "var(--txt-dim)" }}>Join Learning Journey today</p>
-        </div>
-
         {/* Form */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
@@ -100,6 +89,28 @@ const Signup = () => {
           className="rounded-2xl p-8 shadow-2xl"
           style={{ backgroundColor: "var(--bg-sec)" }}
         >
+          {/* Header */}
+          <div className="text-center mb-2">
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4"
+              style={{ backgroundColor: "var(--btn)" }}
+            >
+              <UserPlus className="w-8 h-8 text-white" />
+            </motion.div>
+            <h1
+              className="text-3xl font-bold mb-2"
+              style={{ color: "var(--txt)" }}
+            >
+              Create Account
+            </h1>
+            <p style={{ color: "var(--txt-dim)" }}>
+              Join Learning Journey today
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Error Message */}
             {error && (

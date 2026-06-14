@@ -5,11 +5,14 @@ import axios from "axios";
 import QuestionForm from "../../Components/Session/QuestionForm";
 import QuestionCard from "../../Components/Session/QuestionCard";
 import QuizQueue from "../../Components/Session/QuizQueue";
-import { PlusCircle, ListChecks, CheckCircle2 } from "lucide-react";
+import { PlusCircle, ListChecks, CheckCircle2, ArrowLeft } from "lucide-react";
 
 const CreateRoom = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const handleBack = () => {
+    navigate("/session");
+  };
 
   const [roomData, setRoomData] = useState(null);
   const [generatedQuestions, setGeneratedQuestions] = useState([]);
@@ -120,33 +123,49 @@ const CreateRoom = () => {
     <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--txt)]">
       {/* Header */}
       <header className="sticky top-0 z-10 bg-[var(--bg-ter)] border-b border-black/5">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          {/* Left: Room Info */}
+        <div className="px-6 py-4 grid grid-cols-3 items-start">
+          {/* Left */}
           <div>
+            <button
+              onClick={handleBack}
+              className="flex items-center gap-2 px-4 py-2 rounded-md
+                 bg-[var(--btn)] text-white text-sm font-medium
+                 hover:bg-[var(--btn-hover)] transition"
+            >
+              <ArrowLeft size={16} />
+              Back
+            </button>
+          </div>
+
+          {/* Center */}
+          <div className="text-center">
             <h1 className="text-xl font-semibold text-[var(--txt)]">
               {roomData.roomName}
             </h1>
-            <div className="flex items-center gap-3 mt-1 text-sm text-[var(--txt-dim)]">
-              <span className="font-mono">ID: {roomData.roomId}</span>
-              <span className="w-1 h-1 bg-[var(--txt-dim)] rounded-full" />
+
+            <div className="flex items-center justify-center gap-3 mt-1 text-sm text-[var(--txt-dim)]">
               <span className="px-2 py-0.5 rounded bg-[var(--bg-sec)]">
                 {roomData.category}
               </span>
+              <span className="w-1 h-1 bg-[var(--txt-dim)] rounded-full" />
+              <span className="font-mono">ID: {roomData.roomId}</span>
             </div>
           </div>
 
-          {/* Right: Create Room Action */}
-          <button
-            onClick={handleCreateRoom}
-            disabled={selectedQuestions.length < 5 || isCreating}
-            className="flex items-center gap-2 px-5 py-2 rounded-md
+          {/* Right */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleCreateRoom}
+              disabled={selectedQuestions.length < 5 || isCreating}
+              className="flex items-center gap-2 px-5 py-2 rounded-md
                  bg-[var(--btn)] text-white text-sm font-medium
                  hover:bg-[var(--btn-hover)] transition
                  disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <CheckCircle2 size={16} />
-            {isCreating ? "Creating..." : "Create Room"}
-          </button>
+            >
+              <CheckCircle2 size={16} />
+              {isCreating ? "Creating..." : "Create Room"}
+            </button>
+          </div>
         </div>
       </header>
 

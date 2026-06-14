@@ -43,22 +43,34 @@ export default function AboutUs() {
       >
         <h2 className="text-3xl font-bold mb-6">Idea Behind EduQuest</h2>
 
-        <ul className="list-disc list-inside text-[var(--txt-dim)] space-y-3">
-          <li>
-            Most platforms were <strong>boring</strong> or focused only on
-            grades.
-          </li>
-          <li>
-            Lack of <strong>real-time interaction</strong> and gamification.
-          </li>
-          <li>
-            EduQuest blends{" "}
-            <strong>quizzes + gamification + collaboration</strong>.
-          </li>
-          <li>
-            Includes <strong>live rooms, leaderboards, analytics</strong>.
-          </li>
-        </ul>
+<ul className="list-disc list-inside text-[var(--txt-dim)] space-y-3">
+  <li>
+    Traditional quizzes were <strong>static and uninspiring</strong> — no
+    real engagement or motivation to learn.
+  </li>
+  <li>
+    Students lacked a platform that combined{" "}
+    <strong>learning with friendly competition</strong>.
+  </li>
+  <li>
+    EduQuest introduces <strong>sync & async quiz rooms</strong> — hosts
+    can create rooms, add questions manually or via{" "}
+    <strong>AI-powered generation</strong>, and invite participants anytime.
+  </li>
+  <li>
+    Powered by <strong>fastest-finger-first scoring</strong> — answer
+    correctly and quickly to climb the leaderboard.
+  </li>
+  <li>
+    Features <strong>real-time leaderboards</strong> after every question,
+    keeping participants engaged throughout.
+  </li>
+  <li>
+    Hosts can generate questions instantly by providing a{" "}
+    <strong>topic or description</strong> — AI handles the rest with
+    difficulty-based filtering (Easy, Medium, Hard).
+  </li>
+</ul>
       </motion.section>
 
       {/* Contributors */}
