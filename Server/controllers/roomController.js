@@ -1,7 +1,7 @@
 // server/controllers/roomController.js
-import Room from '../Models/Room.js';
-import Question from '../Models/Question.js';
-import User from '../Models/User.js';
+import Room from '../models/Room.js';
+import Question from '../models/Question.js';
+import User from '../models/User.js';
 import { nanoid } from 'nanoid';
 
 // Create a new room with questions
