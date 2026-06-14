@@ -3,11 +3,10 @@ import express from "express";
 import cors from "cors";
 import path from "path";
 import http from "http";
-import dns from "dns"
+import dns from "dns";
 import { Server as SocketIOServer } from "socket.io";
 import connectDB from "./config/database.js";
-// import { startCronJobs } from './utils/cronJobs.js';
-// Import routes
+
 import authRoutes from "./routes/authRoute.js";
 import questionRoutes from "./routes/questionRoute.js";
 import roomRoutes from "./routes/roomRoute.js";
@@ -20,14 +19,39 @@ import { registerRealtimeRoomSockets } from "./utils/realtimeRoomSockets.js";
 dotenv.config();
 
 const app = express();
-dns.setServers(["1.1.1.1","8.8.8.8"]);
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// ✅ Explicit CORS config — put this BEFORE all routes and other middleware
+const allowedOrigins = [
+  "https://final-year-project-peach-chi.vercel.app",
+  "http://localhost:3000",
+  "http://localhost:5173",
+  // Add any other local dev origins you use
+];
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS blocked for origin: ${origin}`));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
+// ✅ Explicitly handle OPTIONS preflight for ALL routes
+app.options("*", cors(corsOptions));
+
 app.use(express.json());
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // Connect to MongoDB
 connectDB();
@@ -51,28 +75,23 @@ app.get("/api/health", (req, res) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: "Route not found",
-  });
+  res.status(404).json({ success: false, error: "Route not found" });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
   console.error("❌ Server error:", err);
-  res.status(500).json({
-    success: false,
-    error: "Internal server error",
-  });
+  res.status(500).json({ success: false, error: "Internal server error" });
 });
 
-// --- HTTP server (required for Socket.IO) ---
+// HTTP server + Socket.IO
 const httpServer = http.createServer(app);
 
 const io = new SocketIOServer(httpServer, {
   cors: {
-    origin: "*",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
+    credentials: true,
   },
 });
 
