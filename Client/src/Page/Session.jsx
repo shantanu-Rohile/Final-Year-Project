@@ -140,7 +140,7 @@ const Session = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold">My Sessions</h1>
-            <p className="text-[var(--txt-dim)] mt-1">
+            <p className="text-[var(--txt)]/60 mt-1">
               Welcome back,{" "}
               <span className="font-semibold text-[var(--btn)]">
                 {user?.username}
@@ -213,7 +213,7 @@ const Session = () => {
             </div>
 
             {exploredRooms.length === 0 ? (
-              <p className="text-sm text-[var(--txt-dim)]">
+              <p className="text-sm text-[var(--txt)]/60">
                 No saved rooms yet.
               </p>
             ) : (
@@ -232,64 +232,70 @@ const Session = () => {
         </div>
 
         {/* Right Column */}
-        <div className="lg:col-span-1">
-          <div className="bg-[var(--bg-sec)] rounded-2xl p-6 sticky top-8">
-            <div className="flex items-center gap-2 mb-6">
-              <Search className="text-[var(--btn)]" />
-              <h2 className="text-2xl font-bold">Explore Rooms</h2>
-            </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="lg:col-span-1">
+            <div className="bg-[var(--bg-sec)] rounded-2xl p-6 sticky top-8">
+              <div className="flex items-center gap-2 mb-6">
+                <Search className="text-[var(--btn)]" />
+                <h2 className="text-2xl font-bold">Explore Rooms</h2>
+              </div>
 
-            {/* Search */}
-            <form onSubmit={handleSearch} className="mb-6">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={roomId}
-                  onChange={(e) => {
-                    setRoomId(e.target.value.toUpperCase());
-                    setError("");
-                    setSearchedRoom(null);
-                  }}
-                  maxLength={5}
-                  placeholder="Enter Room ID"
-                  className="w-full px-4 py-3 rounded-md
+              {/* Search */}
+              <form onSubmit={handleSearch} className="mb-6">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={roomId}
+                    onChange={(e) => {
+                      setRoomId(e.target.value.toUpperCase());
+                      setError("");
+                      setSearchedRoom(null);
+                    }}
+                    maxLength={5}
+                    placeholder="Enter Room ID"
+                    className="w-full px-4 py-3 rounded-md
                              bg-[var(--bg-ter)] text-[var(--txt)]
                              border border-black/10 font-mono
                              focus:ring-2 focus:ring-[var(--btn)]"
-                />
-                <button
-                  type="submit"
-                  disabled={isSearching}
-                  className="absolute right-2 top-1/2 -translate-y-1/2
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSearching}
+                    className="absolute right-2 top-1/2 -translate-y-1/2
                              px-4 py-2 rounded-md bg-[var(--btn)]
                              text-white text-sm disabled:opacity-50"
-                >
-                  {isSearching ? "..." : "Search"}
-                </button>
-              </div>
+                  >
+                    {isSearching ? "..." : "Search"}
+                  </button>
+                </div>
 
-              {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
-            </form>
+                {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+              </form>
 
-            {/* Search Result */}
-            <AnimatePresence>
-              {searchedRoom && (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  className="mb-6"
-                >
-                  <RoomCard
-                    room={searchedRoom}
-                    onToggleSave={handleToggleSave}
-                    isSaved={savedRoomIds.has(searchedRoom.roomId)}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
+              {/* Search Result */}
+              <AnimatePresence>
+                {searchedRoom && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    className="mb-6"
+                  >
+                    <RoomCard
+                      room={searchedRoom}
+                      onToggleSave={handleToggleSave}
+                      isSaved={savedRoomIds.has(searchedRoom.roomId)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Create Room Modal */}

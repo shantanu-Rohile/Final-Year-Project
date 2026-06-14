@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { motion } from "framer-motion";
 import {
   getRankSuffix,
   getMedalEmoji,
@@ -33,6 +34,30 @@ const FinalLeaderboard = () => {
   useEffect(() => {
     fetchFinalLeaderboard();
   }, []);
+  const podiumContainer = {
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const podiumItem = {
+    hidden: {
+      opacity: 0,
+      y: 100,
+    },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 120,
+        damping: 12,
+      },
+    },
+  };
 
   const fetchFinalLeaderboard = async () => {
     try {
@@ -111,9 +136,9 @@ const FinalLeaderboard = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-2">
-            <Trophy size={40} className="text-[var(--btn)]" />
+            <Trophy size={48} className="text-[var(--btn)]" />
           </div>
-          <h1 className="text-4xl font-bold mb-2 text-[var(--txt)]">
+          <h1 className="text-4xl font-bold mb-2 text-[var(--txt)] tracking-wide">
             Final Leaderboard
           </h1>
           <p className="text-[var(--txt-dim)] text-lg">{roomInfo?.roomName}</p>
@@ -193,45 +218,77 @@ const FinalLeaderboard = () => {
           {/* RIGHT: Full Leaderboard */}
           <div className="lg:col-span-2">
             <div className="bg-[var(--bg-ter)] rounded-xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold mb-6 text-[var(--txt)]">
+              <h2 className="text-2xl font-bold mb-6 text-[var(--txt)] tracking-wider">
                 All Participants
               </h2>
 
               {/* Podium */}
               {topThree.length > 0 && (
-                <div className="flex items-end justify-center gap-6 mb-10">
+                <motion.div
+                  variants={podiumContainer}
+                  initial="hidden"
+                  animate="show"
+                  className="flex items-end justify-center gap-6 mb-10"
+                >
                   {topThree.map((user, idx) => (
-                    <div
+                    <motion.div
                       key={user.userId}
+                      variants={podiumItem}
+                      whileHover={{
+                        scale: 1.05,
+                        transition: { duration: 0.2 },
+                      }}
                       className="flex flex-col items-center"
                     >
                       {idx === 0 && (
-                        <Crown size={36} className="text-yellow-400 mb-2" />
+                        <motion.div
+                          animate={{
+                            y: [0, -8, 0],
+                          }}
+                          transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                          }}
+                        >
+                          <Crown size={36} className="text-yellow-400 mb-2" />
+                        </motion.div>
                       )}
+
                       {idx === 1 && (
                         <Award size={32} className="text-gray-400 mb-2" />
                       )}
+
                       {idx === 2 && (
                         <Award size={32} className="text-orange-400 mb-2" />
                       )}
 
-                      <div
+                      <motion.div
+                        animate={{
+                          scale: idx === 0 ? 1.05 : 1,
+                        }}
                         className="rounded-t-xl px-6 py-4 text-center text-[var(--txt)] bg-[var(--bg-sec)]"
                         style={{
                           height: idx === 0 ? 180 : idx === 1 ? 140 : 120,
+                          boxShadow:
+                            idx === 0
+                              ? "0 0 25px rgba(var(--shadow-rgb), 0.45)"
+                              : "none",
                         }}
                       >
                         <div className="font-bold mb-1">{user.username}</div>
+
                         <div className="text-2xl font-bold">
                           {formatNumber(user.totalScore)}
                         </div>
+
                         <div className="text-xs text-[var(--txt-dim)] mt-1">
                           {user.accuracy}% accuracy
                         </div>
-                      </div>
-                    </div>
+                      </motion.div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               )}
 
               {/* Table */}

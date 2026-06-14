@@ -11,7 +11,7 @@ const RoomCard = ({ room, onToggleSave, isSaved, isOwnRoom = false }) => {
       "Career-Development": "bg-pink-500/10 text-pink-400",
       "Study-Room": "bg-yellow-500/10 text-yellow-400",
       Hobbies: "bg-orange-500/10 text-orange-400",
-      General: "bg-[var(--bg-sec)] text-[var(--txt-dim)]",
+      General: "bg-[var(--bg-sec)] text-[var(--txt)]/60",
     };
     return map[category] || map.General;
   };
@@ -34,7 +34,7 @@ const RoomCard = ({ room, onToggleSave, isSaved, isOwnRoom = false }) => {
           <h3 className="text-base font-semibold text-[var(--txt)] leading-snug">
             {room.roomName}
           </h3>
-          <p className="text-xs text-[var(--txt-dim)] font-mono mt-0.5">
+          <p className="text-xs text-[var(--txt)]/60 font-mono mt-0.5">
             ID: {room.roomId}
           </p>
         </div>
@@ -47,7 +47,7 @@ const RoomCard = ({ room, onToggleSave, isSaved, isOwnRoom = false }) => {
               ${
                 isSaved
                   ? "bg-red-500/10 text-red-400"
-                  : "bg-[var(--bg-sec)] text-[var(--txt-dim)] hover:bg-[var(--bg-primary)]"
+                  : "bg-[var(--bg-sec)] text-[var(--txt)]/60 hover:bg-[var(--bg-primary)]"
               }`}
           >
             {isSaved ? <BookmarkCheck size={18} /> : <Bookmark size={18} />}
@@ -68,13 +68,13 @@ const RoomCard = ({ room, onToggleSave, isSaved, isOwnRoom = false }) => {
 
       {/* Description */}
       {room.description && (
-        <p className="text-sm text-[var(--txt-dim)] mb-4 line-clamp-2">
+        <p className="text-sm text-[var(--txt)]/60 mb-4 line-clamp-2">
           {room.description}
         </p>
       )}
 
       {/* Stats */}
-      <div className="flex items-center gap-4 text-sm text-[var(--txt-dim)] mb-4">
+      <div className="flex items-center gap-4 text-sm text-[var(--txt)]/60 mb-4">
         <div className="flex items-center gap-1">
           <HelpCircle size={14} />
           <span>{room.questionCount} Questions</span>
@@ -87,7 +87,7 @@ const RoomCard = ({ room, onToggleSave, isSaved, isOwnRoom = false }) => {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-3 border-t border-black/5 mt-auto">
-        <div className="text-xs text-[var(--txt-dim)]">
+        <div className="text-xs text-[var(--txt)]/60">
           {room.createdBy && <span>By {room.createdBy}</span>}
           {room.createdAt && <span> • {formatDate(room.createdAt)}</span>}
         </div>

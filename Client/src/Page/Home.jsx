@@ -16,25 +16,53 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "var(--bg-primary)", color: "var(--txt)" }}>
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: "var(--bg-primary)", color: "var(--txt)" }}
+    >
       <main>
         <div className="mx-auto max-w-5xl px-6 py-10">
-          <h1 className="text-2xl font-semibold">
-            Welcome{user?.username ? `, ${user.username}` : ""}
+          <h1 className="text-4xl font-bold">
+            Welcome{user?.username ? `, ${user.username}!` : ""}
           </h1>
-          <p className="mt-2" style={{ color: "var(--txt-dim)" }}>
-            EduQuest is an AI-powered quiz generator with real-time assessment rooms.
+          <p className="mt-2 text-[var(--txt)] opacity-80">
+            EduQuest is an AI-powered quiz generator with real-time assessment
+            rooms.
           </p>
 
           <div
             className="mt-6 rounded-[var(--radius)] border p-6"
-            style={{ backgroundColor: "var(--bg-sec)", borderColor: "rgba(var(--shadow-rgb),0.2)" }}
+            style={{
+              backgroundColor: "var(--bg-sec)",
+              borderColor: "rgba(var(--shadow-rgb),0.2)",
+            }}
           >
-            <h2 className="text-lg font-semibold">How to use</h2>
-            <ol className="mt-3 list-decimal list-inside space-y-2" style={{ color: "var(--txt-dim)" }}>
-              <li>Go to <span className="font-medium" style={{ color: "var(--txt)" }}>Session</span> to practice quizzes.</li>
-              <li>Go to <span className="font-medium" style={{ color: "var(--txt)" }}>Real-time Room</span> to host or join live assessments.</li>
-              <li>Use <span className="font-medium" style={{ color: "var(--txt)" }}>Stats / Notes</span> to track and revise.</li>
+            <h2 className="text-2xl font-bold">How to use</h2>
+            <ol
+              className="mt-3 list-decimal list-inside space-y-2"
+              style={{ color: "var(--txt-dim)" }}
+            >
+              <li>
+                Go to{" "}
+                <span className="font-medium" style={{ color: "var(--txt)" }}>
+                  Session
+                </span>{" "}
+                to practice quizzes.
+              </li>
+              <li>
+                Go to{" "}
+                <span className="font-medium" style={{ color: "var(--txt)" }}>
+                  Real-time Room
+                </span>{" "}
+                to host or join live assessments.
+              </li>
+              <li>
+                Explore{" "}
+                <span className="font-medium" style={{ color: "var(--txt)" }}>
+                  Settings
+                </span>{" "}
+                to customize themes and update your password.
+              </li>
             </ol>
           </div>
 
@@ -56,10 +84,13 @@ export default function Home() {
 
             <div
               className="rounded-[var(--radius)] border p-5"
-              style={{ backgroundColor: "var(--bg-sec)", borderColor: "rgba(var(--shadow-rgb),0.2)" }}
+              style={{
+                backgroundColor: "var(--bg-sec)",
+                borderColor: "rgba(var(--shadow-rgb),0.2)",
+              }}
             >
-              <h3 className="font-semibold">Join Room</h3>
-              <p className="mt-1 text-sm" style={{ color: "var(--txt-dim)" }}>
+              <h3 className="font-bold text-lg pb-2">Join Room</h3>
+              <p className="mt-1 text-sm text-[var(--txt)] opacity-80">
                 Enter a room ID to participate.
               </p>
               <form onSubmit={joinRoom} className="mt-4 flex gap-2">
@@ -68,7 +99,11 @@ export default function Home() {
                   onChange={(e) => setRoomId(e.target.value)}
                   placeholder="Room ID"
                   className="flex-1 rounded-[var(--radius)] border px-3 py-2 text-sm outline-none"
-                  style={{ backgroundColor: "var(--bg-ter)", borderColor: "rgba(var(--shadow-rgb),0.25)", color: "var(--txt)" }}
+                  style={{
+                    backgroundColor: "var(--bg-ter)",
+                    borderColor: "rgba(var(--shadow-rgb),0.25)",
+                    color: "var(--txt)",
+                  }}
                 />
                 <button
                   type="submit"
@@ -90,13 +125,14 @@ export default function Home() {
 function QuickCard({ title, desc, button, onClick, disabled }) {
   return (
     <div
-      className="rounded-[var(--radius)] border p-5"
-      style={{ backgroundColor: "var(--bg-sec)", borderColor: "rgba(var(--shadow-rgb),0.2)" }}
+      className="rounded-[var(--radius)] border p-6"
+      style={{
+        backgroundColor: "var(--bg-sec)",
+        borderColor: "rgba(var(--shadow-rgb),0.2)",
+      }}
     >
-      <h3 className="font-semibold">{title}</h3>
-      <p className="mt-1 text-sm" style={{ color: "var(--txt-dim)" }}>
-        {desc}
-      </p>
+      <h3 className="font-bold text-lg pb-2">{title}</h3>
+      <p className="mt-1 text-sm text-[var(--txt)] opacity-80">{desc}</p>
       <button
         onClick={onClick}
         disabled={disabled}
