@@ -1,6 +1,6 @@
 // server/controllers/savedRoomController.js
-import SavedRoom from '../models/SavedRoom.js';
-import Room from '../models/Room.js';
+import SavedRoom from '../Models/SavedRoom.js';
+import Room from '../Models/Room.js';
 
 // Add room to explored/saved rooms
 export const addSavedRoom = async (req, res) => {

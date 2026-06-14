@@ -1,7 +1,7 @@
 // server/controllers/quizController.js
-import QuizAttempt from "../models/QuizAttempt.js";
-import Room from "../models/Room.js";
-import Question from "../models/Question.js";
+import QuizAttempt from "../Models/QuizAttempt.js";
+import Room from "../Models/Room.js";
+import Question from "../Models/Question.js";
 import calculatePoints from "../utils/scoring.js"; 
 
 
