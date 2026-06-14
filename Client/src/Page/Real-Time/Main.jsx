@@ -164,12 +164,7 @@ function Main() {
             </form>
           </div>
         </div>
-        <button
-          onClick={() => navigate(`/Home`)}
-          className="mt-6 mx-auto block rounded-xl border border-[color:rgba(var(--shadow-rgb),0.2)] bg-[var(--bg-sec)] px-6 py-2.5 text-sm font-semibold text-[var(--accent)] transition-all duration-200 hover:bg-[var(--bg-ter)]"
-        >
-          Home
-        </button>
+        
 
         {/* Footer hint */}
         <p className="mt-8 text-xs text-[var(--txt-disabled)]">

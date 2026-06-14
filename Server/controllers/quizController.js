@@ -2,22 +2,8 @@
 import QuizAttempt from "../models/QuizAttempt.js";
 import Room from "../models/Room.js";
 import Question from "../models/Question.js";
+import calculatePoints from "../utils/scoring.js"; 
 
-// Calculate points based on difficulty and time
-const calculatePoints = (difficulty, timeSpent, isCorrect) => {
-  if (!isCorrect) return 0;
-
-  const BASE_POINTS = {
-    Easy: 100,
-    Medium: 150,
-    Hard: 200,
-  };
-
-  const basePoints = BASE_POINTS[difficulty] || 0;
-  const timeBonus = Math.max(0, Math.floor((30 - timeSpent) * 3));
-
-  return basePoints + timeBonus;
-};
 
 // Check if user has attempted quiz
 export const checkAttempt = async (req, res) => {

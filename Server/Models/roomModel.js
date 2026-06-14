@@ -33,7 +33,14 @@ const questionSchema = new mongoose.Schema({
     default: 30, // fallback safety
     min: 5,
     max: 300
-  }
+  },
+  
+  difficulty: {
+  type: String,
+  enum: ['Easy', 'Medium', 'Hard'],
+  default: 'Medium'
+}
+  
 }, { _id: true });
 
 
@@ -121,7 +128,7 @@ const roomSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
-  }
+  },
 
 });
 
