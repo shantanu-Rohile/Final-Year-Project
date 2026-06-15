@@ -191,10 +191,18 @@ export function registerRealtimeRoomSockets(io) {
 
         const isCorrect =
           selectedOption !== null && selectedOption !== undefined
-            ? Number(selectedOption) === Number(q.correctOptionIndex)
+            ? Number(selectedOption) === Number(q.correctOptionIndex) 
             : false;
+        
+          const pointsEarned=0;
 
-        const pointsEarned = calculatePoints(q.difficulty, timeSpent, isCorrect);
+        if (!isCorrect){
+          pointsEarned=0;
+        }else{
+           pointsEarned = calculatePoints(q.difficulty, timeSpent, isCorrect);
+        }
+
+        
 
         participant.answers.push({
           questionId: q._id,

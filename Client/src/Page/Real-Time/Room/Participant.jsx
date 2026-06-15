@@ -633,6 +633,12 @@ function Participant() {
                   ))}
                 </div>
               )}
+               <button
+                    onClick={() => navigate("/Home")}
+                    className="mt-6 mx-auto block rounded-xl bg-[var(--btn)] hover:bg-[var(--btn-hover)] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 active:scale-95 hover:scale-[1.03]"
+                  >
+                    Back to Home
+                  </button>
             </div>
           )}
 
