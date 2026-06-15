@@ -50,7 +50,6 @@ export function registerRealtimeRoomSockets(io) {
 
         socket.join(roomId);
 
-        // FIX 1: Host is never added to participants — they manage the room only
         const isHost = String(room.host) === String(userId);
 
         if (!isHost) {
@@ -80,7 +79,6 @@ export function registerRealtimeRoomSockets(io) {
           }))
         );
 
-        // Host gets no participant state (they have no questions to answer)
         const participant = isHost
           ? null
           : room.participants.find((p) => String(p.userId) === String(userId));
@@ -130,12 +128,9 @@ export function registerRealtimeRoomSockets(io) {
 
         await room.save();
 
-        // FIX 2: Broadcast contest-started first so clients know to go live
         io.to(roomId).emit("contest-started");
         io.to(roomId).emit("leaderboard-data", leaderboardFromRoom(room));
 
-        // FIX 2: Send each participant their personal state (question index + startedAt)
-        // so the timer and first question load immediately without a refresh
         for (const p of room.participants) {
           if (p.socketId) {
             io.to(p.socketId).emit("your-state", {
@@ -191,18 +186,13 @@ export function registerRealtimeRoomSockets(io) {
 
         const isCorrect =
           selectedOption !== null && selectedOption !== undefined
-            ? Number(selectedOption) === Number(q.correctOptionIndex) 
+            ? Number(selectedOption) === Number(q.correctOptionIndex)
             : false;
-        
-          const pointsEarned=0;
 
-        if (!isCorrect){
-          pointsEarned=0;
-        }else{
-           pointsEarned = calculatePoints(q.difficulty, timeSpent, isCorrect);
-        }
-
-        
+        // FIX: was using `const` then reassigning which throws a runtime error
+        const pointsEarned = isCorrect
+          ? calculatePoints(q.difficulty, timeSpent, isCorrect)
+          : 0;
 
         participant.answers.push({
           questionId: q._id,
@@ -237,7 +227,6 @@ export function registerRealtimeRoomSockets(io) {
 
         io.to(roomId).emit("leaderboard-data", leaderboardFromRoom(room));
 
-        // FIX 3: Exclude the host from the allDone check — only real participants matter
         const nonHostParticipants = (room.participants || []).filter(
           (p) => String(p.userId) !== String(room.host)
         );

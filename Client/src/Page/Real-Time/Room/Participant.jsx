@@ -158,13 +158,15 @@ function Participant() {
   const [leaderboard, setLeaderboard]                   = useState([]);
   const [podiumReady, setPodiumReady]                   = useState(false);
 
+  // FIX: track whether a timeout-submit has been sent per question to avoid duplicates
+  const timeoutSubmittedRef = useRef(new Set());
+
   const socketRef   = useRef(null);
   const timerRef    = useRef(null);
   const finishedRef = useRef(false);
 
   const effectiveUserId = user?.id || userId;
 
-  // Derive isHost from fetched hostId — stable reference
   const isHost = hostId && String(hostId) === String(effectiveUserId);
 
   /* ── FETCH ── */
@@ -193,7 +195,6 @@ function Participant() {
     socketRef.current.on("sync-state", (s) => {
       if (!s) return;
       if (s.status) setStatus(s.status);
-      // sync-state carries participant data only on initial join, not after start-contest
       if (s.participant) {
         if (typeof s.participant.currentQuestionIndex === "number")
           setCurrentQuestionIndex(s.participant.currentQuestionIndex);
@@ -203,20 +204,20 @@ function Participant() {
       }
     });
 
-    // FIX: contest-started just flips status to "live".
-    // The actual question state arrives via "your-state" sent right after by the server.
     socketRef.current.on("contest-started", () => {
       setStatus("live");
     });
 
-    // FIX: your-state now always carries currentQuestionIndex + currentQuestionStartedAt,
-    // so the first question loads immediately without a refresh.
     socketRef.current.on("your-state", (p) => {
       if (!p) return;
       if (typeof p.currentQuestionIndex === "number")
         setCurrentQuestionIndex(p.currentQuestionIndex);
-      if (p.currentQuestionStartedAt)
+      // FIX: always update questionStartedAt — null means completed, new Date handles next question
+      if (p.currentQuestionStartedAt) {
         setQuestionStartedAt(new Date(p.currentQuestionStartedAt));
+      } else {
+        setQuestionStartedAt(null);
+      }
       if (p.completed) setContestCompleted(true);
     });
 
@@ -240,17 +241,40 @@ function Participant() {
 
   /* ── TIMER ── */
   useEffect(() => {
-    if (!questions.length || status !== "live" || !questionStartedAt || contestCompleted || currentQuestionIndex < 0) return;
+    if (
+      !questions.length ||
+      status !== "live" ||
+      !questionStartedAt ||
+      contestCompleted ||
+      currentQuestionIndex < 0
+    ) return;
+
     const q     = questions[currentQuestionIndex];
-    const limit = q?.timeLimit || 30;
+    if (!q) return;
+    const limit = q.timeLimit || 30;
+    const qId   = q._id;
 
     const tick = () => {
       const elapsed   = Math.floor((Date.now() - new Date(questionStartedAt).getTime()) / 1000);
       const remaining = Math.max(0, limit - elapsed);
       setTimeLeft(remaining);
-      if (remaining === 0 && q?._id && !answeredQuestions.has(q._id)) {
-        socketRef.current?.emit("submit-answer", { roomId, questionId: q._id, selectedOption: null });
-        setAnsweredQuestions((prev) => new Set([...prev, q._id]));
+
+      // FIX: use a ref-tracked set so this fires exactly once per question timeout,
+      // even across re-renders caused by answeredQuestions state updates
+      if (
+        remaining === 0 &&
+        qId &&
+        !answeredQuestions.has(qId) &&
+        !timeoutSubmittedRef.current.has(qId)
+      ) {
+        timeoutSubmittedRef.current.add(qId);
+        socketRef.current?.emit("submit-answer", {
+          roomId,
+          questionId: qId,
+          selectedOption: null,
+        });
+        // Mark as answered locally so the UI shows the waiting message
+        setAnsweredQuestions((prev) => new Set([...prev, qId]));
       }
     };
 
@@ -397,7 +421,7 @@ function Participant() {
             </div>
           )}
 
-          {/* WAITING — HOST (live — show a monitor view instead of questions) */}
+          {/* LIVE — HOST monitor view */}
           {status === "live" && isHost && (
             <div className="fade-in-up mt-8 flex flex-col items-center gap-4 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--btn)] shadow-lg">
@@ -633,12 +657,12 @@ function Participant() {
                   ))}
                 </div>
               )}
-               <button
-                    onClick={() => navigate("/Home")}
-                    className="mt-6 mx-auto block rounded-xl bg-[var(--btn)] hover:bg-[var(--btn-hover)] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 active:scale-95 hover:scale-[1.03]"
-                  >
-                    Back to Home
-                  </button>
+              <button
+                onClick={() => navigate("/Home")}
+                className="mt-6 mx-auto block rounded-xl bg-[var(--btn)] hover:bg-[var(--btn-hover)] px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all duration-200 active:scale-95 hover:scale-[1.03]"
+              >
+                Back to Home
+              </button>
             </div>
           )}
 
